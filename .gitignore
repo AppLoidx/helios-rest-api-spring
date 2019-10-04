@@ -29,3 +29,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### GOOGLE client secret ###
+src/main/resources/client_secret_*
