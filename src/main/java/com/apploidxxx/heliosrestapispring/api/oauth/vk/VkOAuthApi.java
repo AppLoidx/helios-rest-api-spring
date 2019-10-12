@@ -118,6 +118,7 @@ public class VkOAuthApi {
         User user = new User(vkUser.getScreenName(), null, vkUser.getFirstName(), vkUser.getLastName());
         if (email != null) user.getContactDetails().setEmail(email);
         user.getContactDetails().setImg(vkUser.getPhoto100Url());
+        user.getContactDetails().setVkontakteId(Long.valueOf(vkUser.getId()));
 
         return user;
     }
