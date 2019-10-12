@@ -6,6 +6,7 @@ import com.apploidxxx.heliosrestapispring.entity.Chat;
 import com.apploidxxx.heliosrestapispring.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,7 @@ import java.util.*;
 /**
  * @author Arthur Kupriyanov
  */
+@EqualsAndHashCode(doNotUseGetters = true)
 @Entity
 @Getter
 @Setter
@@ -74,9 +76,9 @@ public class Queue implements Serializable {
     private Chat chat;
 
     @JsonProperty("queue_sequence")
-    @OrderColumn(nullable = false, name = "sequence")
+    @OrderColumn(nullable = false)
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="queue_sequence", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(joinColumns = @JoinColumn(name = "user_id"))
     private List<Long> queueSequence;
 
     @Column
@@ -85,12 +87,14 @@ public class Queue implements Serializable {
     @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     private Set<Notification> notifications;
 
-    @OneToOne(fetch =  FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch =  FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private SwapContainer swapContainer;
 
     public String getName() {
         return name;
     }
+
+
     public SwapContainer getSwapContainer(){
         if (swapContainer == null) swapContainer = new SwapContainer(this);
 
@@ -158,18 +162,7 @@ public class Queue implements Serializable {
         return this.notifications;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Queue queue = (Queue) o;
-        return Objects.equals(name, queue.name);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
 
     /**
      * Установка значения generation type через String
