@@ -1,7 +1,6 @@
 package com.apploidxxx.heliosrestapispring.api.model;
 
 
-import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.User;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.queue.SwapContainer;
@@ -38,12 +37,8 @@ public class UserInfo implements Serializable {
         this.swapRequestsIn = new ArrayList<>();
         this.swapRequestsOut = new ArrayList<>();
         initQueues(user);
-        setDefaultImage(user);
     }
-    private void setDefaultImage(User user){
-        ContactDetails contactDetails = user.getContactDetails();
-        if (contactDetails.getImg() == null) contactDetails.setImg("https://imgur.com/giuTlrm");
-    }
+
     private void initQueues(User user){
         Set<Map<String, String>> allList = new HashSet<>();
         Set<Map<String, String>> memberList = new HashSet<>();
@@ -93,6 +88,8 @@ public class UserInfo implements Serializable {
         hashMap.put("username", target.getUsername());
         hashMap.put("firstname", target.getFirstName());
         hashMap.put("lastname", target.getLastName());
+        hashMap.put("from", "" + queue.getQueueSequence().indexOf(user.getId()));
+        hashMap.put("to", "" + queue.getQueueSequence().indexOf(target.getId()));
         return hashMap;
     }
 
