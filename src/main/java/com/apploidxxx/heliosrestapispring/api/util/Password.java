@@ -23,14 +23,19 @@ public class Password {
 
     /**
      * Проверка равенства паролей.
-     * Если хотя бы один из null возвращается false
+     * Если хотя бы один из них null возвращается false
      * @param rawPassword проверяемый пароль
      * @param hashedPassword исходный захишированный пароль
      * @return <code>true</code>, если пароли совпадают, иначе <code>false</code>
      */
-    public static boolean isEqual(String rawPassword, String hashedPassword){
+    public static boolean isEqual(String rawPassword, String hashedPassword) {
         if (rawPassword == null || hashedPassword == null) return false;
-        return hashedPassword.equals(hash(rawPassword, hashedPassword));
+        try {
+            return hashedPassword.equals(hash(rawPassword, hashedPassword));
+
+        } catch (IllegalArgumentException e){
+            return false;
+        }
     }
     private static String hash(String password, String anotherEncryptedPassword){
         return Md5Crypt.md5Crypt((password + salt).getBytes(), anotherEncryptedPassword);
