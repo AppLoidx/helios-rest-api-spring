@@ -9,7 +9,6 @@ import com.apploidxxx.heliosrestapispring.entity.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.impl.QueueEMRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import lombok.extern.slf4j.Slf4j;
@@ -35,13 +34,11 @@ public class QueueApi {
     private final UserRepository userRepository;
     private final QueueRepository queueRepository;
     private final SessionRepository sessionRepository;
-    private final QueueEMRepository queueEMRepository;
 
-    public QueueApi(UserRepository userRepository, QueueRepository queueRepository, SessionRepository sessionRepository, QueueEMRepository queueEMRepository) {
+    public QueueApi(UserRepository userRepository, QueueRepository queueRepository, SessionRepository sessionRepository) {
         this.userRepository = userRepository;
         this.queueRepository = queueRepository;
         this.sessionRepository = sessionRepository;
-        this.queueEMRepository = queueEMRepository;
     }
 
     /**
