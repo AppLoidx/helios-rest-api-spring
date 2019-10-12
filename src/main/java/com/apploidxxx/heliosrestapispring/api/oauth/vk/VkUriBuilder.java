@@ -1,5 +1,6 @@
 package com.apploidxxx.heliosrestapispring.api.oauth.vk;
 
+import com.apploidxxx.heliosrestapispring.util.PropertyManager;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
@@ -14,36 +15,25 @@ public class VkUriBuilder {
         private static String VK_ACCESS_URI = "https://oauth.vk.com/access_token";
         private static String VK_API_METHOD_URI = "https://api.vk.com/method/";
         private static String VK_USER_INFO_METHOD_URI = VK_API_METHOD_URI + "users.get";
-        private static String clientId = System.getenv("VK_CLIENT_ID");
-        private static String clientSecret = System.getenv("VK_CLIENT_SECRET");
-        private static String redirectUri = System.getenv("VK_REDIRECT_URI");
+        private final static String clientId ;
+        private final static String clientSecret ;
+        private final static String redirectUri;
 
-        static {
-            Logger logger = Logger.getLogger(VkUriBuilder.class);
-            Properties properties = new Properties();
+        static {    // initializing vk properties from sys env and local_env.properties
+            String clientIdTemp = null;
+            String clientSecretTemp = null;
+            String redirectUriTemp = null;
             try {
-                properties.load(VkUriBuilder.class.getClassLoader().getResourceAsStream("local_configs.properties"));
+                clientIdTemp = PropertyManager.getProperty("VK_CLIENT_ID");
+                clientSecretTemp = PropertyManager.getProperty("VK_CLIENT_SECRET");
+                redirectUriTemp = PropertyManager.getProperty("VK_REDIRECT_URI");
             } catch (IOException e) {
-                logger.error("Couldn't find local configs properties file");
+                e.printStackTrace();
             }
 
-            if (clientId == null) {
-                clientId = properties.getProperty("VK_CLIENT_ID");
-                logger.debug("Client Id set upped from conf file");
-            }
-            else logger.debug("Client Id set upped from env");
-
-            if (clientSecret == null){
-                clientSecret = properties.getProperty("VK_CLIENT_SECRET");
-                logger.debug("Client Secret set upped from conf file");
-            }
-            else logger.debug("Client Secret set upped from env");
-
-            if (redirectUri == null){
-                redirectUri = properties.getProperty("VK_REDIRECT_URI");
-                logger.debug("Redirect URI set upped from conf file");
-            }
-            else logger.debug("Redirect URI set upped from env");
+            clientId = clientIdTemp;
+            clientSecret = clientSecretTemp;
+            redirectUri = redirectUriTemp;
         }
 
 
