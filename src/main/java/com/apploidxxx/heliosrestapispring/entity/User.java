@@ -4,6 +4,7 @@ package com.apploidxxx.heliosrestapispring.entity;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import java.util.Set;
  */
 @Table(name="users")
 @Entity
+@EqualsAndHashCode(exclude = {"queueMember", "queueSuper"})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -112,19 +114,6 @@ public class User {
         return queueMember;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof User){
-            return ((User) obj).getUsername().equals(this.username);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return username.hashCode();
-    }
 
     @Override
     public String toString() {
