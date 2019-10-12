@@ -71,7 +71,7 @@ public class RegisterApi {
             return new ErrorMessage("vulnerability_warning", "sent params may have dangerous words");
         }
 
-        return saveNewUser(username, Password.hash(password), firstName, lastName, email, group, response);
+        return saveNewUser(username, password, firstName, lastName, email, group, response);
 
     }
 
@@ -91,6 +91,7 @@ public class RegisterApi {
         }
     }
 
+    // TODO: add redirect
     private Object saveNewUser(String username, String password, String firstName, String lastName, String email, String group, HttpServletResponse response){
         boolean usernameExist = usernameExist(username);
         boolean emailExist = emailExist(email);

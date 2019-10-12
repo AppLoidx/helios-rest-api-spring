@@ -5,6 +5,7 @@ import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.model.UserInfo;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.api.util.GroupChecker;
+import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
@@ -35,7 +36,8 @@ public class UserApi {
             @RequestParam("access_token") String token) {
 
         User user;
-        if ((user = this.sessionRepository.findByAccessToken(token).getUser()) == null) {
+        Session session = this.sessionRepository.findByAccessToken(token);
+        if (session == null || (user = this.sessionRepository.findByAccessToken(token).getUser()) == null) {
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
         }
 

@@ -8,6 +8,8 @@ import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetail
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +23,8 @@ import java.util.regex.PatternSyntaxException;
 /**
  * @author Arthur Kupriyanov
  */
+@Slf4j
+@Controller
 @RequestMapping(path = "/api/check", produces = "application/json")
 public class CheckApi {
     private final UserRepository userRepository;
@@ -39,8 +43,8 @@ public class CheckApi {
             HttpServletResponse response,
             @RequestParam("check") String check,
             @RequestParam(value = "username", required = false) String username,
-            @RequestParam(value = "username", required = false) String queueName,
-            @RequestParam(value = "username", required = false) String email) {
+            @RequestParam(value = "queue_name", required = false) String queueName,
+            @RequestParam(value = "email", required = false) String email) {
 
         switch (check) {
             case "user_exist":
@@ -88,6 +92,7 @@ public class CheckApi {
             }
         }
 
+
         return queueNames;
     }
 
@@ -95,7 +100,7 @@ public class CheckApi {
         if (queueName == null) return ErrorResponseFactory.getInvalidParamErrorResponse("invalid queue_name param", response);
 
         Queue q = this.queueRepository.findByName(queueName);
-        return new Check(q.getPassword() != null);
+        return new Check(q != null && q.getPassword() != null);
     }
 
     private Object checkEmailExist(String email) {

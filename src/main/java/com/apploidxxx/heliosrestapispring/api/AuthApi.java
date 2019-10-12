@@ -9,6 +9,7 @@ import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.AuthorizationCodeRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import java.io.IOException;
 /**
  * @author Arthur Kupriyanov
  */
+@Slf4j
 @Controller
 @RequestMapping("/api/")
 public class AuthApi {
@@ -41,31 +43,31 @@ public class AuthApi {
             @RequestParam(value = "redirect_uri", required = false) String redirectUri,
             @RequestParam(value = "state", required = false) String state) throws IOException {
         User user = this.userRepository.findByUsername(username);
-            if (user!=null && Password.isEqual(password, user.getPassword())) {
+        if (user!=null && Password.isEqual(password, user.getPassword())) {
 
-                Session s = setUserSession(user);
-                if (redirectUri == null) {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    return new Tokens(s.getAccessToken(), "refresh-accessToken", user);
-                } else {
-                    AuthorizationCode authorizationCode = new AuthorizationCode(user);
-                    this.authorizationCodeRepository.save(authorizationCode);
-                    if (state == null) state = "state";
-
-                    response.sendRedirect(
-                            String.format(redirectUri + "?authorization_code=%s&state=%s", authorizationCode.getAuthCode(), state));
-                    return null;
-                }
+            Session s = setUserSession(user);
+            if (redirectUri == null) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                return new Tokens(s.getAccessToken(), "refresh-accessToken", user);
             } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return new ErrorMessage("invalid_credentials", "invalid login or password");
+                AuthorizationCode authorizationCode = new AuthorizationCode(user);
+                this.authorizationCodeRepository.save(authorizationCode);
+                if (state == null) state = "state";
 
+                response.sendRedirect(
+                        String.format(redirectUri + "?authorization_code=%s&state=%s", authorizationCode.getAuthCode(), state));
+                return null;
             }
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return new ErrorMessage("invalid_credentials", "invalid login or password");
+
+        }
     }
 
     @RequestMapping("/oauth")
     @GetMapping(produces = "application/json")
-    public @ResponseBody Object getAccessTokens(HttpServletResponse response, @RequestParam("authorization_code") String authorizationCode){
+    public @ResponseBody Object getAccessTokens(HttpServletResponse response, @RequestParam(value = "authorization_code", required = false) String authorizationCode){
         AuthorizationCode authCode = this.authorizationCodeRepository.findByAuthCode(authorizationCode);
         if (authCode == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -76,6 +78,7 @@ public class AuthApi {
         this.authorizationCodeRepository.delete(authCode);
         Session s = setUserSession(user);
         response.setStatus(HttpServletResponse.SC_OK);
+
         return new Tokens(s.getAccessToken(), s.getRefreshToken(), user);
     }
 

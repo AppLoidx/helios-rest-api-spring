@@ -9,13 +9,17 @@ import com.apploidxxx.heliosrestapispring.entity.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
+import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.impl.QueueEMRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-
+import java.util.ArrayList;
+import java.util.List;
 
 
 // TODO: Add user filter by group
@@ -23,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Arthur Kupriyanov
  */
+@Slf4j
 @Controller
 @RequestMapping("/api/queue")
 public class QueueApi {
@@ -30,11 +35,13 @@ public class QueueApi {
     private final UserRepository userRepository;
     private final QueueRepository queueRepository;
     private final SessionRepository sessionRepository;
+    private final QueueEMRepository queueEMRepository;
 
-    public QueueApi(UserRepository userRepository, QueueRepository queueRepository, SessionRepository sessionRepository) {
+    public QueueApi(UserRepository userRepository, QueueRepository queueRepository, SessionRepository sessionRepository, QueueEMRepository queueEMRepository) {
         this.userRepository = userRepository;
         this.queueRepository = queueRepository;
         this.sessionRepository = sessionRepository;
+        this.queueEMRepository = queueEMRepository;
     }
 
     /**
@@ -133,7 +140,7 @@ public class QueueApi {
             user = this.sessionRepository.findByAccessToken(token).getUser();
             if (user == null) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return new ErrorMessage("invalid_token", "yout token invalid or expired");
+                return new ErrorMessage("invalid_token", "your token invalid or expired");
             }
             VulnerabilityChecker.checkWord(queueName);
             VulnerabilityChecker.checkWord(fullname);
@@ -167,6 +174,7 @@ public class QueueApi {
      * @return OK, UNAUTHORIZED, NOT_FOUND, NOT_ACCEPTABLE
      */
     @DeleteMapping(produces = "application/json")
+    @Transactional
     public @ResponseBody Object delete(
             HttpServletResponse response,
             @RequestParam("queue_name") String queueName,
@@ -180,7 +188,6 @@ public class QueueApi {
         }
         if (!target.matches("(USER)|(QUEUE)")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            // TODO: more informative message needed
             return new ErrorMessage("invalid_target", "Unknown target value");
         }
 
@@ -237,12 +244,18 @@ public class QueueApi {
         }
     }
 
-    private Object deleteQueue(String queueName, User user, HttpServletResponse response){
+    @Transactional
+    protected Object deleteQueue(String queueName, User user, HttpServletResponse response){
         Queue q = this.queueRepository.findByName(queueName);
-
+        log.info("Deleting queue");
         if (q!=null){
             if (q.getSuperUsers().contains(user)){
-                this.queueRepository.delete(q);
+                this.queueRepository.deleteById(q.getName());
+                List<Queue> queueList = new ArrayList<>();
+                queueList.add(q);
+                this.queueRepository.deleteInBatch(queueList);
+//                queueEMRepository.deleteQueue(q);
+                log.info("Queue deleted");
                 response.setStatus(HttpServletResponse.SC_OK);
                 return null;
             } else {

@@ -57,6 +57,11 @@ public class SwapApi {
             return new ErrorMessage("user_not_found", "User not found in requested queue");
         }
 
+        if (user.equals(targetUser)){
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return new ErrorMessage("self_request", "You can't request to swap yourself");
+        }
+
         boolean isSwapped = queue.getSwapContainer().addSwapRequest(user , targetUser);
         this.queueRepository.save(queue);
 
