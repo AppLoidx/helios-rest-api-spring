@@ -1,6 +1,7 @@
 package com.apploidxxx.heliosrestapispring.api.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 /**
@@ -16,11 +17,11 @@ public class ErrorMessage {
         this.errorDescription = errorDescription;
     }
 
-    @JsonAlias("error")
+    @JsonProperty("error")
     public final String errorMessage;
 
 
-    @JsonAlias("error_description")
+    @JsonProperty("error_description")
     public final String errorDescription;
 
 }

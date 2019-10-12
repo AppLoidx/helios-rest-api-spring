@@ -4,6 +4,7 @@ package com.apploidxxx.heliosrestapispring.api.model;
 import com.apploidxxx.heliosrestapispring.entity.User;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 /**
@@ -11,10 +12,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class Tokens {
 
-    @JsonAlias("accessToken")
+    @JsonProperty("access_token")
     public final String token;
 
-    @JsonAlias("refresh_token")
+    @JsonProperty("refresh_token")
     public final String refreshToken;
 
     @JsonIgnore
