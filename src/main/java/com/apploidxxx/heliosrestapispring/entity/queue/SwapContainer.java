@@ -1,6 +1,7 @@
 package com.apploidxxx.heliosrestapispring.entity.queue;
 
 import com.apploidxxx.heliosrestapispring.entity.User;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.Map;
 /**
  * @author Arthur Kupriyanov
  */
+@ToString(exclude = "queue")
 @Entity
 public class SwapContainer {
 
@@ -24,7 +26,7 @@ public class SwapContainer {
 
     @Id
     @GeneratedValue
-    Long id;
+    private Long id;
 
 
     @OneToOne
@@ -74,5 +76,9 @@ public class SwapContainer {
         }
 
         return users;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
