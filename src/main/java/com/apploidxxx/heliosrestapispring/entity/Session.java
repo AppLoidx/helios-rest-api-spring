@@ -26,7 +26,7 @@ public class Session {
     @GeneratedValue
     Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "token",unique = true, nullable = false)
     private String accessToken;
 
     @Column(nullable = false)
