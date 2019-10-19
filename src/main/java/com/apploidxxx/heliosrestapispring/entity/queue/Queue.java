@@ -38,13 +38,11 @@ public class Queue implements Serializable {
         this(name, name);
     }
 
-    @JsonProperty("creation_date")
     @Temporal(TemporalType.TIMESTAMP)
     @Column
     private Date creationDate;
 
     @Column
-    @JsonProperty("generation_type")
     private GenerationType generationType;
 
     @Column
@@ -64,7 +62,6 @@ public class Queue implements Serializable {
 
     private Set<User> members;
 
-    @JsonProperty("super_users")
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="QUEUE_SUPER_USERS",
             joinColumns = {@JoinColumn(name="queue_name")},
@@ -75,7 +72,8 @@ public class Queue implements Serializable {
     @JsonIgnore
     private Chat chat;
 
-    @JsonProperty("queue_sequence")
+
+    // TODO: rewrite to user
     @OrderColumn(nullable = false)
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(joinColumns = @JoinColumn(name = "queue_name"))

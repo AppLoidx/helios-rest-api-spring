@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthorizationCodeModel {
-    @JsonProperty("authorization_code")
     private String authorizationCode;
 }

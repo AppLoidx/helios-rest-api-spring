@@ -22,14 +22,9 @@ public class UserInfo implements Serializable {
     private User user;
 
     private  List<Map<String, String>> queues;
-
-    @JsonProperty("queues_member")
     private  List<Map<String, String>> queuesMember;
 
-    @JsonProperty("swap_requests_in")
     private List<Map<String, String>> swapRequestsIn;
-
-    @JsonProperty("swap_requests_out")
     private List<Map<String, String>> swapRequestsOut;
 
     public UserInfo(User user){

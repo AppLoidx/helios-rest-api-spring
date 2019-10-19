@@ -23,12 +23,9 @@ public class UserSettings {
         }
     }
 
-    @JsonProperty("contact_details")
     public ContactDetails getContactDetails(){
         return this.user.getContactDetails();
     }
-
-    @JsonProperty("username")
     public String getUsername(){
         return this.user.getUsername();
     }

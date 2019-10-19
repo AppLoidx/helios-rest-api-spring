@@ -50,6 +50,5 @@ public class ContactDetails {
     private String email;
 
     @Column(unique = true)
-    @JsonProperty("vkontakte_id")
     private Long vkontakteId;
 }

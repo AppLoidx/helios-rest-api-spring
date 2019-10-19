@@ -64,7 +64,6 @@ public class User {
     @JsonIgnore
     private Set<Queue> queueMember;
 
-    @JsonProperty("user_type")
     private UserType userType = UserType.STUDENT;
 
     @JoinColumn(name="session")
@@ -74,13 +73,11 @@ public class User {
 
     @JoinColumn(name = "contactDetails")
     @OneToOne(cascade = CascadeType.ALL)
-    @JsonProperty("contact_details")
     private ContactDetails contactDetails;
 
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @JsonProperty("group_name")
     private String groupName;
 
     @Column(name = "password")
@@ -88,11 +85,9 @@ public class User {
     private String password;
 
     @Column(name = "firstName", nullable = false)
-    @JsonProperty("first_name")
     private String firstName;
 
     @Column(name = "lastName")
-    @JsonProperty("last_name")
     private String lastName;
 
     @OneToMany

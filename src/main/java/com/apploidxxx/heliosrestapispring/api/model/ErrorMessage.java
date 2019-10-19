@@ -17,11 +17,7 @@ public class ErrorMessage {
         this.errorDescription = errorDescription;
     }
 
-    @JsonProperty("error")
     public final String errorMessage;
-
-
-    @JsonProperty("error_description")
     public final String errorDescription;
 
 }

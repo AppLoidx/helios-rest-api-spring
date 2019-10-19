@@ -31,7 +31,6 @@ public class Notification implements Comparable<Notification>{
         this.creationDate = new Date();
     }
 
-    @JsonProperty("creation_date")
     private Date creationDate;
 
     @JsonIgnore

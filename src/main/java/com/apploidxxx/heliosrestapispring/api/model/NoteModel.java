@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 public class NoteModel {
-    @JsonProperty("note_id")
+
     public Long noteId;
     public String author;
     public String target;
