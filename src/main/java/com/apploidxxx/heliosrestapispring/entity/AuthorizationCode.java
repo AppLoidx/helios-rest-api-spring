@@ -1,5 +1,6 @@
 package com.apploidxxx.heliosrestapispring.entity;
 
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import lombok.Data;
 import org.apache.commons.codec.digest.Md5Crypt;
 

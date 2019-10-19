@@ -1,5 +1,6 @@
 package com.apploidxxx.heliosrestapispring.entity;
 
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
