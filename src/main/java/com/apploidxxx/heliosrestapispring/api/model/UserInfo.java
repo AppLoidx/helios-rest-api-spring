@@ -1,7 +1,7 @@
 package com.apploidxxx.heliosrestapispring.api.model;
 
 
-import com.apploidxxx.heliosrestapispring.entity.User;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.queue.SwapContainer;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +14,7 @@ import java.util.*;
  *
  * POJO объект для информации о пользователе
  *
- * @see com.apploidxxx.heliosrestapispring.entity.User
+ * @see User
  * @author Arthur Kupriyanov
  */
 @Data

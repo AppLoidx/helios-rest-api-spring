@@ -7,13 +7,14 @@ import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.api.util.GroupChecker;
 import com.apploidxxx.heliosrestapispring.api.util.Password;
 import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
-import com.apploidxxx.heliosrestapispring.entity.User;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetailsRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 
 /**
@@ -38,7 +39,9 @@ public class RegisterApi {
             @RequestParam("first_name") String firstName,
             @RequestParam("last_name") String lastName,
             @RequestParam("email") String email,
-            @RequestParam(value = "group", required = false) String group){
+            @RequestParam(value = "group", required = false) String group,
+            @RequestParam(value = "redirect_uri", defaultValue = "/auth/login.html") String redirectUri,
+            @RequestParam(value = "state", required = false) String state) throws IOException {
 
         if ("".equals(password) || password.length() < 8){
             return ErrorResponseFactory.getInvalidParamErrorResponse("Your password length is too small", response);
@@ -71,8 +74,7 @@ public class RegisterApi {
             return new ErrorMessage("vulnerability_warning", "sent params may have dangerous words");
         }
 
-        return saveNewUser(username, password, firstName, lastName, email, group, response);
-
+        return saveNewUser(username, password, firstName, lastName, email, group, response, redirectUri, state);
     }
 
     @DeleteMapping(produces = "application/json")
@@ -92,12 +94,17 @@ public class RegisterApi {
     }
 
     // TODO: add redirect
-    private Object saveNewUser(String username, String password, String firstName, String lastName, String email, String group, HttpServletResponse response){
+    private Object saveNewUser(
+            String username, String password, String firstName, String lastName, String email, String group,
+            HttpServletResponse response, String redirectUri, String state
+    ) throws IOException {
+
         boolean usernameExist = usernameExist(username);
         boolean emailExist = emailExist(email);
 
         if (!usernameExist && !emailExist){
             this.userRepository.save(new User(username, Password.hash(password), firstName, lastName, email, group));
+            response.sendRedirect(redirectUri + "?state=" + state);
             return null;
         }
         else {

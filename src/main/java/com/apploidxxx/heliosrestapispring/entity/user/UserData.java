@@ -1,4 +1,4 @@
-package com.apploidxxx.heliosrestapispring.entity;
+package com.apploidxxx.heliosrestapispring.entity.user;
 
 
 import com.apploidxxx.heliosrestapispring.entity.note.Note;

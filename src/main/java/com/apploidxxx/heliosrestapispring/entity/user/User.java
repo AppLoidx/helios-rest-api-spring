@@ -1,6 +1,8 @@
-package com.apploidxxx.heliosrestapispring.entity;
+package com.apploidxxx.heliosrestapispring.entity.user;
 
 
+import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
+import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -78,6 +80,7 @@ public class User {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
+    @JsonProperty("group_name")
     private String groupName;
 
     @Column(name = "password")
@@ -91,6 +94,9 @@ public class User {
     @Column(name = "lastName")
     @JsonProperty("last_name")
     private String lastName;
+
+    @OneToMany
+    private Set<Badge> badges;
 
     /**
      *

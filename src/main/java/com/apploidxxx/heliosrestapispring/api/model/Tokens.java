@@ -1,8 +1,7 @@
 package com.apploidxxx.heliosrestapispring.api.model;
 
 
-import com.apploidxxx.heliosrestapispring.entity.User;
-import com.fasterxml.jackson.annotation.JsonAlias;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
