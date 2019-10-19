@@ -31,8 +31,8 @@ public class OAuthApi {
 
     @ApiOperation(value = "OAuth 2.0 provider")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "You get an access_token and refresh_token"),
-            @ApiResponse(code = 400, message = "Invalid params or authorization_code")
+            @ApiResponse(code = 200, message = "You get an access_token and refresh_token", response = Tokens.class),
+            @ApiResponse(code = 400, message = "Invalid params or authorization_code", response = ErrorMessage.class)
     })
     @GetMapping(produces = "application/json")
     public @ResponseBody
