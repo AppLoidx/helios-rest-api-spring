@@ -32,11 +32,11 @@ public class AuthApi {
         this.authorizationCodeRepository = authorizationCodeRepository;
     }
 
-    @ApiOperation(value = "Authorize with user's login and password", response = Tokens.class)
+    @ApiOperation(value = "Authorize with user's login and password")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "User authorized successfully. You get an authorization_code"),
-            @ApiResponse(code = 401, message = "Invalid password or login"),
-            @ApiResponse(code = 400, message = "Invalid params")
+            @ApiResponse(code = 200, message = "User authorized successfully. You get an authorization_code", response = Tokens.class),
+            @ApiResponse(code = 401, message = "Invalid password or login", response = ErrorMessage.class),
+            @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
     })
     @GetMapping(produces = "application/json")
     public Object authorize( HttpServletResponse response,
