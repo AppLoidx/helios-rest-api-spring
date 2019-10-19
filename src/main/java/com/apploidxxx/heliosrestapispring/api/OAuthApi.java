@@ -40,8 +40,7 @@ public class OAuthApi {
             HttpServletResponse response,
 
             @ApiParam(value = "authorization_code reached with OAuth user authorization", required = true)
-            @RequestParam(value = "authorization_code")
-            String authorizationCode
+            @RequestParam(value = "authorization_code") String authorizationCode
     ){
 
         AuthorizationCode authCode = this.authorizationCodeRepository.findByAuthCode(authorizationCode);

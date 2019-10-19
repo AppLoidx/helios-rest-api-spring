@@ -61,7 +61,7 @@ public class ChatApi {
     ){
 
         User user = this.sessionRepository.findByAccessToken(token).getUser();
-        if (user == null) return generateInvalidTokenErrorResponse(response);
+        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);;
 
         Queue queue = this.queueRepository.findByName(queueName);
         if (queue  == null) return generateQueueNotFoundErrorResponse(response);
@@ -77,12 +77,6 @@ public class ChatApi {
         chat.newMessage(user, message);
         this.queueRepository.save(queue);
         return null;
-    }
-
-    private ErrorMessage generateInvalidTokenErrorResponse(HttpServletResponse response){
-        return ErrorResponseFactory
-                .getInvalidParamErrorResponse(
-                        "invalid_token", "Your token is invalid or expired. Please, take new token or refresh existing", response);
     }
 
     private ErrorMessage generateQueueNotFoundErrorResponse(HttpServletResponse response){

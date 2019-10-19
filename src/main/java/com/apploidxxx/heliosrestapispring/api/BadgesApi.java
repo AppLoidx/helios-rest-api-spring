@@ -47,7 +47,7 @@ public class BadgesApi {
 
         // !WARNING: if you want refactor these two lines be careful. We need to verify user with him access_token
         Session session = sessionRepository.findByAccessToken(accessToken);
-        if (session == null) return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
+        if (session == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
 
         if (username == null) return session.getUser().getBadges();
 

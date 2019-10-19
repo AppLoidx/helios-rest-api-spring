@@ -4,6 +4,7 @@ package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.api.exception.VulnerabilityException;
 import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
+import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
@@ -29,8 +30,8 @@ import java.util.List;
  */
 @Api("Queue management")
 @Slf4j
-@Controller
-@RequestMapping("/api/queue")
+@RestController
+@RequestMapping(value = "/api/queue", produces = "application/json")
 public class QueueApi {
 
     private final UserRepository userRepository;
@@ -46,20 +47,21 @@ public class QueueApi {
     @ApiOperation("Get queue")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Get queue", response = Queue.class),
-            @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
+            @ApiResponse(code = 404, message = "Queue not found", response = ErrorMessage.class)
     })
-    @GetMapping(produces = "application/json")
-    public @ResponseBody Object getQueue(
+    @GetMapping
+    public Object getQueue(
             HttpServletResponse response,
-            @ApiParam(value = "Queue short name", required = true) @RequestParam("queue_name") String queueName)
-    {
+
+            @ApiParam(value = "Queue short name", required = true)
+            @RequestParam("queue_name") String queueName
+    ) {
         Queue queue = this.queueRepository.findByName(queueName);
 
-        if (queue != null) return queue;
-        else {
-            response.setStatus(400);
-            return new ErrorMessage("invalid_queue_name", "queue this with name not found");
-        }
+        if (queue == null)
+            return ErrorResponseFactory.getNotFoundErrorResponse("queue_not_found", "Queue with this name not found", response);
+
+        return queue;
     }
 
     @ApiOperation("Get queue")
@@ -69,57 +71,60 @@ public class QueueApi {
             @ApiResponse(code = 404, message = "Queue not found", response = ErrorMessage.class),
             @ApiResponse(code = 403, message = "Invalid or empty password", response = ErrorMessage.class)
     })
-    @PutMapping(produces = "application/json")
-    public @ResponseBody Object joinQueue(
+    @PutMapping
+    public Object joinQueue(
             HttpServletResponse response,
+
             @ApiParam(value = "Queue short name", required = true)@RequestParam("queue_name") String queueName,
             @RequestParam("access_token") String token,
 
             @ApiParam(value = "Password of queue. Not required if queue doesn't have password")
-            @RequestParam(value = "password", required = false) String password)
-    {
+            @RequestParam(value = "password", required = false) String password
+    ) {
 
         User user = sessionRepository.findByAccessToken(token).getUser();
-        if (user == null){
-            response.setStatus(400);
-            return new ErrorMessage("invalid_token", "your token is invalid or expired");
-        }
-        Queue q = this.queueRepository.findByName(queueName);
-        if (q==null){
-            response.setStatus(404);
-            return new ErrorMessage("queue_not_found", "Queue with this name not found");
-        }
-        if (q.getMembers().contains(user)){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("repeated_request", "you already in queue");
-        } else {
-            if (q.getPassword() == null){
-                q.addUser(user);
-                q.getNotifications().add(new Notification(user, "Пользователь " + user.getFirstName() + " " + user.getLastName() + " присоеденился к очереди"));
-                this.queueRepository.save(q);
-                response.setStatus(HttpServletResponse.SC_OK);
-                return null;
-            } else {
-                if (password == null){
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    return new ErrorMessage("forbidden", "you don't have access to this queue");
-                }
-                else {
-                    if (password.equals(q.getPassword())){
-                        q.addUser( user);
-                        q.getNotifications().add(new Notification(user, "Пользователь " + user.getFirstName() + " " + user.getLastName() + " присоеденился к очереди"));
-                        this.queueRepository.save(q);
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        return null;
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                        return new ErrorMessage("forbidden", "you don't have access to this queue");
-                    }
-                }
-            }
+        if (user == null)
+            return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
 
+        Queue queue = this.queueRepository.findByName(queueName);
+        if (queue == null)
+            return ErrorResponseFactory.getNotFoundErrorResponse("queue_not_found", "Queue with this name not found", response);
+
+        if (queue.getMembers().contains(user))
+            return ErrorResponseFactory.getInvalidParamErrorResponse("repeated_request", "you already in queue", response);
+
+
+        if (queue.getPassword() == null){
+            addNewUserToQueue(queue, user);
+            this.queueRepository.save(queue);
+
+            return null;
         }
 
+        if (!queue.getPassword().equals(password))
+            return getForbiddenErrorResponse(response);
+
+        addNewUserToQueue(queue, user);
+        this.queueRepository.save(queue);
+
+        return null;
+    }
+
+    private void addNewUserToQueue(Queue queue, User user){
+        queue.addUser( user);
+        addNewUserNotification(queue, user);
+    }
+
+    private void addNewUserNotification(Queue queue, User user){
+        queue.getNotifications()
+                .add(new Notification(
+                        user,
+                        String.format("Пользователь %s %s присоеденился к очереди", user.getFirstName(), user.getLastName())
+                ));
+    }
+
+    private ErrorMessage getForbiddenErrorResponse(HttpServletResponse response){
+        return ErrorResponseFactory.getForbiddenErrorResponse("you don't have access to this queue", response);
     }
 
     @ApiOperation("Create queue")
@@ -127,31 +132,33 @@ public class QueueApi {
             @ApiResponse(code = 200, message = "Queue created"),
             @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
     })
-    @PostMapping(produces = "application/json")
-    public @ResponseBody Object createQueue(
+    @PostMapping
+    public Object createQueue(
             HttpServletResponse response,
+
             @ApiParam(value = "Queue short name", required = true)@RequestParam("queue_name") String queueName,
             @RequestParam("access_token") String token,
-            @ApiParam(value = "Fullname of queue", required = true)@RequestParam("fullname") String fullname,
-            @ApiParam(value = "Provide password if queue is private")@RequestParam(value = "password", required = false) String password,
-            @ApiParam(value = "ONE_WEEK, TWO_WEEKS, NOT_STATED (not required)")@RequestParam(value = "generation", required = false) String generationType){
 
-        User user;
+            @ApiParam(value = "Fullname of queue", required = true)
+            @RequestParam("fullname") String fullname,
+
+            @ApiParam(value = "Provide password if queue is private")
+            @RequestParam(value = "password", required = false) String password,
+
+            @ApiParam(value = "ONE_WEEK, TWO_WEEKS, NOT_STATED (not required)")
+            @RequestParam(value = "generation", required = false) String generationType
+    ){
+
+        User user = this.sessionRepository.findByAccessToken(token).getUser();
+        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
+
         try {
-            // TODO: refactor (maybe use Fabric pattern)
-            user = this.sessionRepository.findByAccessToken(token).getUser();
-            if (user == null) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return new ErrorMessage("invalid_token", "your token invalid or expired");
-            }
-            VulnerabilityChecker.checkWord(queueName);
-            VulnerabilityChecker.checkWord(fullname);
+            VulnerabilityChecker.checkWord(queueName, fullname);
         } catch (VulnerabilityException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("vulnerability", "founded vulnerability warning in your request params");
+            return e.getResponse(response);
         }
 
-        Queue q = new Queue(queueName, fullname==null?queueName:fullname);
+        Queue q = new Queue(queueName, fullname);
         q.addSuperUser(user);
         if (password != null && !"".equals(password)) q.setPassword(password);
         if (generationType != null && !"".equals(generationType)) q.setGenerationType(generationType);
@@ -159,9 +166,8 @@ public class QueueApi {
         try {
             q.getNotifications().add(new Notification(null, "Создана очередь"));
             this.queueRepository.save(q);
-            response.setStatus(HttpServletResponse.SC_OK);
             return null;
-        }catch (Exception e){
+        } catch (Exception e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return new ErrorMessage("internal_server_error", e.getMessage());
         }
@@ -178,32 +184,50 @@ public class QueueApi {
     @Transactional
     public @ResponseBody Object delete(
             HttpServletResponse response,
-            @ApiParam(value = "Queue short name", required = true)@RequestParam("queue_name") String queueName,
-            @ApiParam(value = "Provide this param if you want delete user")@RequestParam(value = "username", required = false) String userName,
-            @ApiParam(value = "USER or QUEUE", required = true)@RequestParam("target") String target,
-            @RequestParam("access_token") String token) {
+            @ApiParam(value = "Queue short name", required = true)
+            @RequestParam("queue_name") String queueName,
+
+            @ApiParam(value = "Provide this param if you want delete user")
+            @RequestParam(value = "username", required = false) String userName,
+
+            @ApiParam(value = "USER or QUEUE", required = true)
+            @RequestParam("target") String target,
+
+            @RequestParam("access_token") String token
+    ) {
         target = target.toUpperCase();
         User user = this.sessionRepository.findByAccessToken(token).getUser();
-        if (user == null){
-            return new ErrorMessage("invalid_token", "yout token invalid or expired");
-        }
-        if (!target.matches("(USER)|(QUEUE)")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("invalid_target", "Unknown target value");
+        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
+
+        if (!target.matches("(USER)|(QUEUE)"))
+            return ErrorResponseFactory.getInvalidParamErrorResponse("invalid_target", "Unknown target value", response);
+
+
+        if (isDeletingAnotherUser(userName, target)) {
+            return deleteUser(userName, queueName, user, response);
         }
 
-        if (userName != null && target.equals("USER")) {
-            return deleteUser(userName, queueName, user, response);
-        } else if (userName == null && target.equals("USER")) {
+        if (isDeleteSelf(userName, target)) {
             return deleteUser(user.getUsername(), queueName, user, response);
-        } else if (target.equals("QUEUE")){
-            return deleteQueue(queueName, user, response);
-        } else {
-            // TODO: add error message
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return null;
         }
+
+        if (target.equals("QUEUE")){
+            return deleteQueue(queueName, user, response);
+        }
+
+        return ErrorResponseFactory.getInvalidParamErrorResponse("target not found", response);
+
     }
+
+    private boolean isDeletingAnotherUser(String userName, String target){
+        return userName != null && target.equals("USER");
+    }
+
+    private boolean isDeleteSelf(String userName, String target){
+        return userName == null && target.equals("USER");
+    }
+
+    // TODO: control point of refactoring
 
     private Object deleteUser(String username, String queueName, User user, HttpServletResponse response) {
         if (user == null) {
