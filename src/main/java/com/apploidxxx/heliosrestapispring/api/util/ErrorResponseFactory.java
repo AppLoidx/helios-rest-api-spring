@@ -14,6 +14,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class ErrorResponseFactory {
 
+    // *
+
+    // BAD REQUEST STATUS - 400
+
+    // *
+
 
     /**
      * Возвращает Response со статусом BAD_REQUEST (400)
@@ -29,6 +35,16 @@ public abstract class ErrorResponseFactory {
     public static ErrorMessage getInvalidParamErrorResponse(String description, HttpServletResponse response){
         return getInvalidParamErrorResponse("invalid_param", description, response);
     }
+
+    public static ErrorMessage getInvalidTokenErrorResponse(HttpServletResponse response){
+        return ErrorResponseFactory.getInvalidParamErrorResponse("invalid_token", "your token is invalid or expired", response);
+    }
+
+    // *
+
+    // FORBIDDEN STATUS - 403
+
+    // *
 
     /**
      * Возвращает Response со статусом FORBIDDEN (403)
@@ -48,9 +64,27 @@ public abstract class ErrorResponseFactory {
         return getForbiddenErrorResponse("You don't have enough rights", response);
     }
 
+
+    // *
+
+    // UNAUTHORIZED STATUS - 401
+
+    // *
+
     public static ErrorMessage getUnauthorizedErrorResponse(String title, String description, HttpServletResponse response){
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         return new ErrorMessage(title, description);
     }
 
+
+    // *
+
+    // NOT FOUND STATUS - 404
+
+    // *
+
+    public static ErrorMessage getNotFoundErrorResponse(String title, String description, HttpServletResponse response){
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        return new ErrorMessage(title, description);
+    }
 }
