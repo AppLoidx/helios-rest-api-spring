@@ -40,11 +40,19 @@ public class QueueControlApi {
     @PutMapping
     public @ResponseBody Object action(
             HttpServletResponse response,
-            @ApiParam(value = "Provide this param if you want delete user", required = true)@PathVariable("queueId") String queueId,
-            @ApiParam(value = "Action type: (shuffle, settype, setadmin)", required = true)@RequestParam("action") String action,
+
+            @PathVariable("queueId") String queueId,
+
+            @ApiParam(value = "Action type: (shuffle, settype, setadmin)", required = true)
+            @RequestParam("action") String action,
+
             @RequestParam("access_token") String accessToken,
-            @ApiParam(value = "Required for 'settype' action")@RequestParam(value = "type", required = false) String newType,
-            @ApiParam(value = "Required for 'setadmin' action")@RequestParam(value = "admin", required = false) String newAdmin){
+
+            @ApiParam(value = "Required for 'settype' action")
+            @RequestParam(value = "type", required = false) String newType,
+
+            @ApiParam(value = "Required for 'setadmin' action")
+            @RequestParam(value = "admin", required = false) String newAdmin){
 
 
         User user;
