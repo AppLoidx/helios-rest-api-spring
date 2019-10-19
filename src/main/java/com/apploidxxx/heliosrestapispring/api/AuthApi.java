@@ -9,12 +9,10 @@ import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.AuthorizationCodeRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,14 +32,18 @@ public class AuthApi {
         this.authorizationCodeRepository = authorizationCodeRepository;
     }
 
-    @RequestMapping("/auth")
+    @ApiOperation(value = "Authorize with user's login and password", response = Tokens.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "User authorized successfully. You get an authorization_code"),
+            @ApiResponse(code = 401, message = "Invalid password or login"),
+            @ApiResponse(code = 400, message = "Invalid params")
+    })
     @GetMapping(produces = "application/json")
-
-    public @ResponseBody Object authorize( HttpServletResponse response,
-            @RequestParam("login") String username,
-            @RequestParam("password") String password,
-            @RequestParam(value = "redirect_uri", required = false) String redirectUri,
-            @RequestParam(value = "state", required = false) String state) throws IOException {
+    public Object authorize( HttpServletResponse response,
+            @ApiParam(value = "user's login", required = true)@RequestParam("login") String username,
+            @ApiParam(value = "user's password", required = true)@RequestParam("password") String password,
+            @ApiParam(value = "uri to redirect after successful auth")@RequestParam(value = "redirect_uri", required = false) String redirectUri,
+            @ApiParam(value = "custom state value which returns as param")@RequestParam(value = "state", required = false) String state) throws IOException {
         User user = this.userRepository.findByUsername(username);
         if (user!=null && Password.isEqual(password, user.getPassword())) {
 
