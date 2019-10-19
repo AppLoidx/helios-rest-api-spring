@@ -6,7 +6,7 @@ import com.apploidxxx.heliosrestapispring.api.oauth.vk.model.UserInfo;
 import com.apploidxxx.heliosrestapispring.api.oauth.vk.model.VkUser;
 import com.apploidxxx.heliosrestapispring.entity.AuthorizationCode;
 import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
-import com.apploidxxx.heliosrestapispring.entity.User;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.AuthorizationCodeRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetailsRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
