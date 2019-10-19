@@ -3,7 +3,7 @@ package com.apploidxxx.heliosrestapispring.entity.queue;
 
 
 import com.apploidxxx.heliosrestapispring.entity.Chat;
-import com.apploidxxx.heliosrestapispring.entity.User;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
@@ -31,7 +31,7 @@ public class Queue implements Serializable {
         this.queueSequence = new LinkedList<>();
         this.chat = new Chat(this);
         this.fullname = fullname;
-        this.notifications = new HashSet<>();
+        this.notifications = new TreeSet<>();
         this.swapContainer = new SwapContainer(this);
     }
     public Queue(String name){
@@ -78,7 +78,7 @@ public class Queue implements Serializable {
     @JsonProperty("queue_sequence")
     @OrderColumn(nullable = false)
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(joinColumns = @JoinColumn(name = "queue_name"))
     private List<Long> queueSequence;
 
     @Column
@@ -158,7 +158,7 @@ public class Queue implements Serializable {
     }
 
     public Set<Notification> getNotifications(){
-        if (this.notifications == null) this.notifications = new HashSet<>();
+        if (this.notifications == null) this.notifications = new TreeSet<>();
         return this.notifications;
     }
 
