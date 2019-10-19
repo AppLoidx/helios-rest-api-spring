@@ -6,7 +6,7 @@ import com.apploidxxx.heliosrestapispring.entity.user.User;
 /**
  * @author Arthur Kupriyanov
  */
-public enum Badges {
+public enum BadgesFactory {
     DEVELOPER{
         @Override
         public Badge getInstance(User user) {
@@ -29,8 +29,8 @@ public enum Badges {
 
     public abstract Badge getInstance(User user);
 
-    public static Badges getBadge(String name){
-        for (Badges badge : Badges.values()){
+    public static BadgesFactory getBadge(String name){
+        for (BadgesFactory badge : BadgesFactory.values()){
             if (badge.name().equals(name.toUpperCase())){
                 return badge;
             }

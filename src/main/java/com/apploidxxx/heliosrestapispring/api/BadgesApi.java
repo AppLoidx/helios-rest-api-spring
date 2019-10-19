@@ -1,6 +1,6 @@
 package com.apploidxxx.heliosrestapispring.api;
 
-import com.apploidxxx.heliosrestapispring.api.util.Badges;
+import com.apploidxxx.heliosrestapispring.api.util.BadgesFactory;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
@@ -36,23 +36,26 @@ public class BadgesApi {
     })
     @GetMapping(produces = "application/json")
     public Object getBadges(
-            @ApiParam(value = "user's access token", required = true) @RequestParam("access_token") String accessToken,
-            @ApiParam(value = "username of badges owner", required = true)@RequestParam("username") String username,
-            HttpServletResponse response
-    ){
-        Session session = sessionRepository.findByAccessToken(accessToken);
-        if (session != null && session.getUser() != null){
-            User user;
-            if (username != null){
-                if (( user = userRepository.findByUsername(username)) == null){
-                    return ErrorResponseFactory.getInvalidParamErrorResponse("User with this username not found", response);
-                }
-            } else user = session.getUser();
+            HttpServletResponse response,
 
-            return user.getBadges();
-        } else {
-            return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
-        }
+            @ApiParam(value = "user's access token", required = true)
+            @RequestParam("access_token") String accessToken,
+
+            @ApiParam(value = "username of badges owner", required = true)
+            @RequestParam("username") String username
+    ){
+
+        // !WARNING: if you want refactor these two lines be careful. We need to verify user with him access_token
+        Session session = sessionRepository.findByAccessToken(accessToken);
+        if (session == null) return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
+
+        if (username == null) return session.getUser().getBadges();
+
+        User user = userRepository.findByUsername(username);
+
+        if (user != null) return user.getBadges();
+
+        return ErrorResponseFactory.getInvalidParamErrorResponse("User with this username not found", response);
     }
 
     @ApiOperation("Add badge. Works with admins only")
@@ -62,31 +65,49 @@ public class BadgesApi {
     })
     @PutMapping
     public Object putBadge(
+            HttpServletResponse response,
+
             @RequestParam("username") String username,
             @RequestParam("access_token") String accessToken,
-            @ApiParam("Badge's name like developer, teacher and etc.")@RequestParam("badge_name") String badgeName,
-            HttpServletResponse response){
 
-        Session session = sessionRepository.findByAccessToken(accessToken);
-        if (session == null || session.getUser() == null){
+            @ApiParam("Badge's name like developer, teacher and etc.")
+            @RequestParam("badge_name") String badgeName
+
+    ){
+
+        Session session = this.sessionRepository.findByAccessToken(accessToken);
+        if (session == null )
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
-        }
 
-        if (session.getUser().getUserType() != UserType.ADMIN){
+
+        if (checkUserIsNotAdmin(session.getUser()))
             return ErrorResponseFactory.getForbiddenErrorResponse("Only admin can add badges", response);
-        }
 
-        User target = userRepository.findByUsername(username);
-        Badges badges = Badges.getBadge(badgeName);
-        if (badges != null){
-            Badge badge = badges.getInstance(target);
-            target.getBadges().remove(badge);   // if you want to change badge's color - you have to delete old version
-            target.getBadges().add(badge);
-            userRepository.save(target);
-            return null;
-        } else {
+
+        User target = this.userRepository.findByUsername(username);
+        BadgesFactory badgesFactory = BadgesFactory.getBadge(badgeName);
+
+        if (badgesFactory == null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid badge name", response);
-        }
+
+        addBadgeToUser(target, badgesFactory);
+        this.userRepository.save(target);
+
+        return null;
+
+    }
+
+    private void addBadgeToUser(User user, BadgesFactory badgesFactoryType ){
+        Badge badge = badgesFactoryType.getInstance(user);
+
+        // if we want to change badge's color - we have to delete old version
+        user.getBadges().remove(badge);
+        user.getBadges().add(badge);
+    }
+
+    private void removeBadge(User user, BadgesFactory badgesFactoryType ){
+        Badge badge = badgesFactoryType.getInstance(user);
+        user.getBadges().remove(badge);
     }
 
     @ApiOperation("Delete badge. Works with admins only")
@@ -96,29 +117,35 @@ public class BadgesApi {
     })
     @DeleteMapping
     public Object removeBadge(
+            HttpServletResponse response,
+
             @RequestParam("username") String username,
             @RequestParam("access_token") String accessToken,
-            @ApiParam("Badge's name like developer, teacher and etc.")@RequestParam("badge_name") String badgeName,
-            HttpServletResponse response){
+
+            @ApiParam("Badge's name like developer, teacher and etc.")
+            @RequestParam("badge_name") String badgeName
+    ){
 
         Session session = sessionRepository.findByAccessToken(accessToken);
-        if (session == null || session.getUser() == null){
+        if (session == null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
-        }
 
-        if (session.getUser().getUserType() != UserType.ADMIN){
+        if (checkUserIsNotAdmin(session.getUser()))
             return ErrorResponseFactory.getForbiddenErrorResponse("Only admin can remove badges", response);
-        }
+
 
         User target = userRepository.findByUsername(username);
-        Badges badges = Badges.getBadge(badgeName);
-        if (badges != null){
-            Badge badge = badges.getInstance(target);
-            target.getBadges().remove(badge);
-            userRepository.save(target);
-            return null;
-        } else {
+        BadgesFactory badgesFactory = BadgesFactory.getBadge(badgeName);
+        if (badgesFactory == null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid badge name", response);
-        }
+
+        removeBadge(target, badgesFactory);
+        userRepository.save(target);
+        return null;
+
+    }
+
+    private boolean checkUserIsNotAdmin(User user){
+        return user.getUserType() != UserType.ADMIN;
     }
 }
