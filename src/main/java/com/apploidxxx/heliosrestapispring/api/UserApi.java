@@ -9,6 +9,10 @@ import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Arthur Kupriyanov
  */
-
+@Api("User's data")
 @Controller
 @RequestMapping(value = "/api/user", produces = "application/json")
 public class UserApi {
@@ -30,6 +34,11 @@ public class UserApi {
         this.userRepository = userRepository;
     }
 
+    @ApiOperation("Get user info")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Get a user info as json", response = UserInfo.class),
+            @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
+    })
     @GetMapping
     public @ResponseBody Object getInfo(
             HttpServletResponse response,
