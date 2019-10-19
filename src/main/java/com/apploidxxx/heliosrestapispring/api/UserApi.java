@@ -51,29 +51,4 @@ public class UserApi {
         return new UserInfo(user);
     }
 
-    @PutMapping
-    public @ResponseBody ErrorMessage putSettings(
-            HttpServletResponse response,
-            @RequestParam("param") String param,
-            @RequestParam("value") String value,
-            @RequestParam("access_token") String token){
-        User user;
-        if ((user = this.sessionRepository.findByAccessToken(token).getUser()) == null) {
-            return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
-        }
-
-        // we checking this, because we will add new features for param (new values)
-        if ("group".equals(param)) {
-            value = value.toUpperCase();
-            return GroupChecker.isValid(value) ? setGroup(value, user) : ErrorResponseFactory.getInvalidParamErrorResponse("Invalid group name", response);
-        }
-        return ErrorResponseFactory.getInvalidParamErrorResponse("This param name not found", response);
-    }
-
-    private ErrorMessage setGroup(String group, User user){
-        user.setGroupName(group);
-        this.userRepository.save(user);
-        return null;
-    }
-
 }
