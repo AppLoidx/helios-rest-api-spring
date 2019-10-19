@@ -14,15 +14,20 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class ErrorResponseFactory {
 
+
     /**
      * Возвращает Response со статусом BAD_REQUEST (400)
+     * @param title оглавление ошибки
      * @param description описание ошибки invalid_param
      * @return Response
      */
-    public static ErrorMessage getInvalidParamErrorResponse(String description, HttpServletResponse response){
+    public static ErrorMessage getInvalidParamErrorResponse(String title, String description, HttpServletResponse response){
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        return new ErrorMessage("invalid_param", description);
+        return new ErrorMessage(title, description);
+    }
 
+    public static ErrorMessage getInvalidParamErrorResponse(String description, HttpServletResponse response){
+        return getInvalidParamErrorResponse("invalid_param", description, response);
     }
 
     /**
