@@ -43,4 +43,9 @@ public abstract class ErrorResponseFactory {
         return getForbiddenErrorResponse("You don't have enough rights", response);
     }
 
+    public static ErrorMessage getUnauthorizedErrorResponse(String title, String description, HttpServletResponse response){
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return new ErrorMessage(title, description);
+    }
+
 }
