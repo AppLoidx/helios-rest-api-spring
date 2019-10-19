@@ -1,6 +1,6 @@
 package com.apploidxxx.heliosrestapispring.entity.queue;
 
-import com.apploidxxx.heliosrestapispring.entity.User;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import lombok.ToString;
 
 import javax.persistence.*;
