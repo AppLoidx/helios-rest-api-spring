@@ -8,6 +8,8 @@ import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepositor
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Arthur Kupriyanov
  */
+@Api("Controls of queue")
 @Controller
 @RequestMapping("/api/queue/{queueId}")
 public class QueueControlApi {
@@ -33,15 +36,15 @@ public class QueueControlApi {
         this.sessionRepository = sessionRepository;
     }
 
-
+    // TODO: rename queueId to queue_name !WARNING see web-application
     @PutMapping
     public @ResponseBody Object action(
             HttpServletResponse response,
-            @PathVariable("queueId") String queueId,
-            @RequestParam("action") String action,
+            @ApiParam(value = "Provide this param if you want delete user", required = true)@PathVariable("queueId") String queueId,
+            @ApiParam(value = "Action type: (shuffle, settype, setadmin)", required = true)@RequestParam("action") String action,
             @RequestParam("access_token") String accessToken,
-            @RequestParam(value = "type", required = false) String newType,
-            @RequestParam(value = "admin", required = false) String newAdmin){
+            @ApiParam(value = "Required for 'settype' action")@RequestParam(value = "type", required = false) String newType,
+            @ApiParam(value = "Required for 'setadmin' action")@RequestParam(value = "admin", required = false) String newAdmin){
 
 
         User user;
