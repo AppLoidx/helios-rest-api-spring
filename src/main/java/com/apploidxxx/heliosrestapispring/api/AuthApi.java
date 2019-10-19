@@ -23,8 +23,8 @@ import java.io.IOException;
  * @author Arthur Kupriyanov
  */
 @Slf4j
-@Controller
-@RequestMapping("/api/")
+@RestController
+@RequestMapping("/api/auth")
 public class AuthApi {
     private final UserRepository userRepository;
     private final AuthorizationCodeRepository authorizationCodeRepository;
@@ -63,23 +63,6 @@ public class AuthApi {
             return new ErrorMessage("invalid_credentials", "invalid login or password");
 
         }
-    }
-
-    @RequestMapping("/oauth")
-    @GetMapping(produces = "application/json")
-    public @ResponseBody Object getAccessTokens(HttpServletResponse response, @RequestParam(value = "authorization_code", required = false) String authorizationCode){
-        AuthorizationCode authCode = this.authorizationCodeRepository.findByAuthCode(authorizationCode);
-        if (authCode == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("invalid_code", "Your authorization code is invalid");
-        }
-
-        User user = authCode.getUser();
-        this.authorizationCodeRepository.delete(authCode);
-        Session s = setUserSession(user);
-        response.setStatus(HttpServletResponse.SC_OK);
-
-        return new Tokens(s.getAccessToken(), s.getRefreshToken(), user);
     }
 
     private Session setUserSession(User user) {
