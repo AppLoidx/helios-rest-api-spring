@@ -120,6 +120,10 @@ public class User {
         return queueMember;
     }
 
+    public Session getSession(){
+        return this.session==null?new Session():this.session;
+    }
+
 
     @Override
     public String toString() {
