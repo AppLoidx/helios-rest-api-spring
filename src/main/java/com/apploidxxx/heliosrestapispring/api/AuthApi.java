@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+
+
 /**
  * @author Arthur Kupriyanov
  */
@@ -97,7 +99,7 @@ public class AuthApi {
 
     private Session setUserSession(User user) {
 
-        Session s = user.getSession()!=null?user.getSession():new Session();
+        Session s = user.getSession();
         s.generateSession(user);
 
         this.userRepository.save(user);

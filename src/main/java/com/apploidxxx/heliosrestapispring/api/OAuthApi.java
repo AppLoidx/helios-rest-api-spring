@@ -2,6 +2,7 @@ package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.model.Tokens;
+import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.entity.AuthorizationCode;
 import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.AuthorizationCodeRepository;
@@ -35,35 +36,30 @@ public class OAuthApi {
             @ApiResponse(code = 400, message = "Invalid params or authorization_code", response = ErrorMessage.class)
     })
     @GetMapping(produces = "application/json")
-    public @ResponseBody
-    Object getAccessTokens(
+    public Object getAccessTokens(
             HttpServletResponse response,
-            @ApiParam(value = "authorization_code reached with OAuth user authorization", required = true)@RequestParam(value = "authorization_code", required = false)
-                    String authorizationCode
+
+            @ApiParam(value = "authorization_code reached with OAuth user authorization", required = true)
+            @RequestParam(value = "authorization_code")
+            String authorizationCode
     ){
 
         AuthorizationCode authCode = this.authorizationCodeRepository.findByAuthCode(authorizationCode);
-        if (authCode == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            // we need to response our error message instead of spring invalid param
-            return new ErrorMessage("invalid_code", "Your authorization code is invalid");
-        }
+        if (authCode == null)
+            return ErrorResponseFactory.getInvalidParamErrorResponse("invalid_code", "Your authorization code is invalid", response);
 
         User user = authCode.getUser();
         this.authorizationCodeRepository.delete(authCode);
         Session s = setUserSession(user);
-        response.setStatus(HttpServletResponse.SC_OK);
 
         return new Tokens(s.getAccessToken(), s.getRefreshToken(), user);
     }
 
     private Session setUserSession(User user) {
 
-        Session s;
-        if (user.getSession()!=null) s = user.getSession();
-        else s = new Session();
-
+        Session s = user.getSession();
         s.generateSession(user);
+
         this.userRepository.save(user);
         return s;
     }
