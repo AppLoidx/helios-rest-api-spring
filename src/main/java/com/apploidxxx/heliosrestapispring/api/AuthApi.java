@@ -34,16 +34,31 @@ public class AuthApi {
 
     @ApiOperation(value = "Authorize with user's login and password")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "User authorized successfully. You get an authorization_code", response = Tokens.class),
+            @ApiResponse(
+                    code = 200,
+                    message = "User authorized successfully. Client will redirect to redirect_uri or gets Tokens if redirect_uri is declared"
+            ),
             @ApiResponse(code = 401, message = "Invalid password or login", response = ErrorMessage.class),
             @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
     })
     @GetMapping(produces = "application/json")
-    public Object authorize( HttpServletResponse response,
-            @ApiParam(value = "user's login", required = true)@RequestParam("login") String username,
-            @ApiParam(value = "user's password", required = true)@RequestParam("password") String password,
-            @ApiParam(value = "uri to redirect after successful auth")@RequestParam(value = "redirect_uri", required = false) String redirectUri,
-            @ApiParam(value = "custom state value which returns as param")@RequestParam(value = "state", required = false) String state) throws IOException {
+    public Object authorize(
+            HttpServletResponse response,
+
+            @ApiParam(value = "user's login", required = true)
+            @RequestParam("login") String username,
+
+            @ApiParam(value = "user's password", required = true)
+            @RequestParam("password") String password,
+
+            @ApiParam(value = "uri to redirect after successful auth")
+            @RequestParam(value = "redirect_uri", required = false) String redirectUri,
+
+            @ApiParam(value = "custom state value which returns as param")
+            @RequestParam(value = "state", required = false) String state
+
+    ) throws IOException {
+
         User user = this.userRepository.findByUsername(username);
         if (user!=null && Password.isEqual(password, user.getPassword())) {
 
