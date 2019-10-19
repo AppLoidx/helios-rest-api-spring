@@ -1,7 +1,7 @@
 package com.apploidxxx.heliosrestapispring.entity.queue;
 
 
-import com.apploidxxx.heliosrestapispring.entity.User;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import java.util.Date;
 @Setter
 @Getter
 @NoArgsConstructor
-public class Notification {
+public class Notification implements Comparable<Notification>{
     @Id
     @GeneratedValue
     private Long id;
@@ -47,4 +47,9 @@ public class Notification {
 
     @Column(nullable = false)
     private String message;
+
+    @Override
+    public int compareTo(Notification o) {
+        return (int) (o.creationDate.getTime() - this.creationDate.getTime());
+    }
 }
