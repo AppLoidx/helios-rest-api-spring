@@ -11,6 +11,7 @@ import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepositor
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.util.List;
 /**
  * @author Arthur Kupriyanov
  */
+@Api("Queue management")
 @Slf4j
 @Controller
 @RequestMapping("/api/queue")
@@ -41,13 +43,16 @@ public class QueueApi {
         this.sessionRepository = sessionRepository;
     }
 
-    /**
-     *
-     * @param queueName имя очереди
-     * @return Очередь в формате JSON или NOT_FOUND
-     */
+    @ApiOperation("Get queue")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Get queue", response = Queue.class),
+            @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
+    })
     @GetMapping(produces = "application/json")
-    public @ResponseBody Object getQueue(HttpServletResponse response, @RequestParam("queue_name") String queueName){
+    public @ResponseBody Object getQueue(
+            HttpServletResponse response,
+            @ApiParam(value = "Queue short name", required = true) @RequestParam("queue_name") String queueName)
+    {
         Queue queue = this.queueRepository.findByName(queueName);
 
         if (queue != null) return queue;
@@ -57,28 +62,32 @@ public class QueueApi {
         }
     }
 
-    /**
-     *
-     * @param queueName имя очереди
-     * @param token access_token
-     * @param password пароль для очереди (обязателен, если очередь имеет пароль)
-     * @return 200 - успешно вошел в очередь, иначе BAD_REQUEST или NOT_FOUND
-     */
+    @ApiOperation("Get queue")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "User successfully joined queue"),
+            @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class),
+            @ApiResponse(code = 404, message = "Queue not found", response = ErrorMessage.class),
+            @ApiResponse(code = 403, message = "Invalid or empty password", response = ErrorMessage.class)
+    })
     @PutMapping(produces = "application/json")
-    public @ResponseBody Object joinQueue(HttpServletResponse response,
-            @RequestParam("queue_name") String queueName,
-                              @RequestParam("access_token") String token,
-                              @RequestParam(value = "password", required = false) String password){
+    public @ResponseBody Object joinQueue(
+            HttpServletResponse response,
+            @ApiParam(value = "Queue short name", required = true)@RequestParam("queue_name") String queueName,
+            @RequestParam("access_token") String token,
+
+            @ApiParam(value = "Password of queue. Not required if queue doesn't have password")
+            @RequestParam(value = "password", required = false) String password)
+    {
 
         User user = sessionRepository.findByAccessToken(token).getUser();
         if (user == null){
             response.setStatus(400);
-            return new ErrorMessage("invalid_token", "yout token invalid or expired");
+            return new ErrorMessage("invalid_token", "your token is invalid or expired");
         }
         Queue q = this.queueRepository.findByName(queueName);
         if (q==null){
             response.setStatus(404);
-            return null;
+            return new ErrorMessage("queue_not_found", "Queue with this name not found");
         }
         if (q.getMembers().contains(user)){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -104,7 +113,7 @@ public class QueueApi {
                         return null;
                     } else {
                         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                        return null;
+                        return new ErrorMessage("forbidden", "you don't have access to this queue");
                     }
                 }
             }
@@ -113,23 +122,19 @@ public class QueueApi {
 
     }
 
-    /**
-     *
-     * @param queueName имя очереди для короткой ссылки
-     * @param token access_token
-     * @param fullname полное имя очереди
-     * @param password пароль очереди
-     * @param generationType тип генерации
-     * @return 200 - усли успешно, иначе INTERNAL_SERVER_ERROR, либо NOT_FOUND
-     */
+    @ApiOperation("Create queue")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Queue created"),
+            @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
+    })
     @PostMapping(produces = "application/json")
     public @ResponseBody Object createQueue(
             HttpServletResponse response,
-            @RequestParam("queue_name") String queueName,
+            @ApiParam(value = "Queue short name", required = true)@RequestParam("queue_name") String queueName,
             @RequestParam("access_token") String token,
-            @RequestParam("fullname") String fullname,
-            @RequestParam(value = "password", required = false) String password,
-            @RequestParam(value = "generation", required = false) String generationType){
+            @ApiParam(value = "Fullname of queue", required = true)@RequestParam("fullname") String fullname,
+            @ApiParam(value = "Provide password if queue is private")@RequestParam(value = "password", required = false) String password,
+            @ApiParam(value = "ONE_WEEK, TWO_WEEKS, NOT_STATED (not required)")@RequestParam(value = "generation", required = false) String generationType){
 
         User user;
         try {
@@ -153,30 +158,29 @@ public class QueueApi {
 
         try {
             q.getNotifications().add(new Notification(null, "Создана очередь"));
-           this.queueRepository.save(q);
-           response.setStatus(HttpServletResponse.SC_OK);
-           return null;
+            this.queueRepository.save(q);
+            response.setStatus(HttpServletResponse.SC_OK);
+            return null;
         }catch (Exception e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return new ErrorMessage("internal_server_error", e.getMessage());
         }
     }
 
-    /**
-     *
-     * @param queueName имя очереди
-     * @param userName нужно указать, если необходимо удлалить пользователя
-     * @param target USER - удалить пользователя, QUEUE - удалить очередь (регистронезависим)
-     * @param token access_token
-     * @return OK, UNAUTHORIZED, NOT_FOUND, NOT_ACCEPTABLE
-     */
+    @ApiOperation("Delete queue or user from queue")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Queue deleted"),
+            @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class),
+            @ApiResponse(code = 401, message = "Not enough permissions", response = ErrorMessage.class),
+            @ApiResponse(code = 400, message = "Queue or user not found", response = ErrorMessage.class)
+    })
     @DeleteMapping(produces = "application/json")
     @Transactional
     public @ResponseBody Object delete(
             HttpServletResponse response,
-            @RequestParam("queue_name") String queueName,
-            @RequestParam(value = "username", required = false) String userName,
-            @RequestParam("target") String target,
+            @ApiParam(value = "Queue short name", required = true)@RequestParam("queue_name") String queueName,
+            @ApiParam(value = "Provide this param if you want delete user")@RequestParam(value = "username", required = false) String userName,
+            @ApiParam(value = "USER or QUEUE", required = true)@RequestParam("target") String target,
             @RequestParam("access_token") String token) {
         target = target.toUpperCase();
         User user = this.sessionRepository.findByAccessToken(token).getUser();
@@ -236,7 +240,7 @@ public class QueueApi {
             return null;
         } else {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return null;
+            return new ErrorMessage("forbidden", "you don't have permissions to delete this queue");
 
         }
     }
