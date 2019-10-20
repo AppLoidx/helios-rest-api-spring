@@ -14,13 +14,10 @@ import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
 
 
 // TODO: Add user filter by group
@@ -136,10 +133,9 @@ public class QueueApi {
     public Object createQueue(
             HttpServletResponse response,
 
-            @ApiParam(value = "Queue short name", required = true)@RequestParam("queue_name") String queueName,
+            @RequestParam("queue_name") String queueName,
             @RequestParam("access_token") String token,
 
-            @ApiParam(value = "Fullname of queue", required = true)
             @RequestParam("fullname") String fullname,
 
             @ApiParam(value = "Provide password if queue is private")
@@ -184,7 +180,7 @@ public class QueueApi {
     @Transactional
     public @ResponseBody Object delete(
             HttpServletResponse response,
-            @ApiParam(value = "Queue short name", required = true)
+
             @RequestParam("queue_name") String queueName,
 
             @ApiParam(value = "Provide this param if you want delete user")
@@ -227,70 +223,60 @@ public class QueueApi {
         return userName == null && target.equals("USER");
     }
 
-    // TODO: control point of refactoring
-
     private Object deleteUser(String username, String queueName, User user, HttpServletResponse response) {
-        if (user == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return null;
-        }
 
         Queue q = this.queueRepository.findByName(queueName);
+        if (q == null) return prepareQueueNotFoundErrorResponse(response);
 
-        if (q == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return new ErrorMessage("queue_not_found", "queue with this params not found");
-        }
         if (username.equals(user.getUsername())) {
-            if (!q.getMembers().contains(user)) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return new ErrorMessage("user_not_found", "User with name " + username + " not found");
-            }
-            q.getMembers().remove(user);
-            q.getNotifications().add(new Notification(null, "Пользователь " + user.getFirstName() + " " + user.getLastName() + " вышел из очереди"));
-            queueRepository.save(q);
-            return null;
-        }
-        if (q.getSuperUsers().contains(user)) {
-            User delUser = this.userRepository.findByUsername(username);
-            if (delUser == null || !q.getMembers().contains(delUser)) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return new ErrorMessage("user_not_found", "User with name " + username + " not found");
-            }
-            q.getMembers().remove(delUser);
-            q.getNotifications().add(new Notification(user, "Пользователь " + delUser.getFirstName() + " " + delUser.getLastName() + " был удален из очереди"));
-            this.queueRepository.save(q);
-            response.setStatus(200);
-            return null;
-        } else {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return new ErrorMessage("forbidden", "you don't have permissions to delete this queue");
 
+            // user deletes self
+
+            if (!q.getMembers().contains(user)) return prepareUserNotFoundErrorResponse(response);
+            q.getMembers().remove(user);
+            q.getNotifications().add(prepareUserExitQueueNotification(user));
+            this.queueRepository.save(q);
+            return null;
         }
+
+        if (!q.getSuperUsers().contains(user)) return prepareForbiddenErrorResponse(response);
+
+        User delUser = this.userRepository.findByUsername(username);
+        if (delUser == null || !q.getMembers().contains(delUser)) return prepareUserNotFoundErrorResponse(response);
+
+        q.getMembers().remove(delUser);
+        q.getNotifications().add(prepareUserWasDeletedFromQueue(user, delUser));
+        this.queueRepository.save(q);
+        return null;
     }
 
     @Transactional
     protected Object deleteQueue(String queueName, User user, HttpServletResponse response){
         Queue q = this.queueRepository.findByName(queueName);
-        log.info("Deleting queue");
-        if (q!=null){
-            if (q.getSuperUsers().contains(user)){
-                this.queueRepository.deleteById(q.getName());
-                List<Queue> queueList = new ArrayList<>();
-                queueList.add(q);
-                this.queueRepository.deleteInBatch(queueList);
-//                queueEMRepository.deleteQueue(q);
-                log.info("Queue deleted");
-                response.setStatus(HttpServletResponse.SC_OK);
-                return null;
-            } else {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                return null;
-            }
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return new ErrorMessage("queue_not_found", "Queue with name " + queueName + " not found");
 
-        }
+        if (q == null) return prepareQueueNotFoundErrorResponse(response);
+        if (!q.getSuperUsers().contains(user)) return prepareForbiddenErrorResponse(response);
+        this.queueRepository.deleteById(q.getName());
+        return null;
+    }
+
+    private ErrorMessage prepareQueueNotFoundErrorResponse(HttpServletResponse response){
+        return ErrorResponseFactory.getNotFoundErrorResponse("queue_not_found", "queue with this params not found", response);
+    }
+
+    private ErrorMessage prepareUserNotFoundErrorResponse(HttpServletResponse response){
+        return ErrorResponseFactory.getNotFoundErrorResponse("user_not_found", "User not found", response);
+    }
+
+    private ErrorMessage prepareForbiddenErrorResponse(HttpServletResponse response){
+        return ErrorResponseFactory.getForbiddenErrorResponse("you don't have enough permissions to manage queue", response);
+    }
+
+    private Notification prepareUserExitQueueNotification(User user){
+        return new Notification(null, "Пользователь " + user.getFirstName() + " " + user.getLastName() + " вышел из очереди");
+    }
+
+    private Notification prepareUserWasDeletedFromQueue(User whoDelete, User whoWasDeleted){
+        return new Notification(whoDelete, "Пользователь " + whoWasDeleted.getFirstName() + " " + whoWasDeleted.getLastName() + " был удален из очереди");
     }
 }
