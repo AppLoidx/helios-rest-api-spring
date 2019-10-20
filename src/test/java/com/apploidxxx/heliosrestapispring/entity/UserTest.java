@@ -1,6 +1,7 @@
 package com.apploidxxx.heliosrestapispring.entity;
 
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import org.junit.Test;
 
 import java.util.HashSet;

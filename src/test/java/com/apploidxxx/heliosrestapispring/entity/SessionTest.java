@@ -1,5 +1,6 @@
 package com.apploidxxx.heliosrestapispring.entity;
 
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
