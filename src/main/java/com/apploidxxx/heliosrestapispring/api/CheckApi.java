@@ -8,12 +8,10 @@ import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetail
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -24,7 +22,7 @@ import java.util.regex.PatternSyntaxException;
  * @author Arthur Kupriyanov
  */
 @Slf4j
-@Controller
+@RestController
 @RequestMapping(path = "/api/check", produces = "application/json")
 public class CheckApi {
     private final UserRepository userRepository;
@@ -38,13 +36,21 @@ public class CheckApi {
     }
 
     @GetMapping
-    public @ResponseBody
-    Object check(
+    public Object check(
             HttpServletResponse response,
+
+            @ApiParam("(user_exist, queue_exist, email_exist, queue_match, queue_private)")
             @RequestParam("check") String check,
+
+            @ApiParam("required for 'user_exist'")
             @RequestParam(value = "username", required = false) String username,
+
+            @ApiParam("required for 'queue_exist, queue_match, queue_private'")
             @RequestParam(value = "queue_name", required = false) String queueName,
-            @RequestParam(value = "email", required = false) String email) {
+
+            @ApiParam("required for 'email_exist'")
+            @RequestParam(value = "email", required = false) String email
+    ) {
 
         switch (check) {
             case "user_exist":
