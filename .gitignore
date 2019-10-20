@@ -32,3 +32,4 @@ build/
 
 ### GOOGLE client secret ###
 src/main/resources/client_secret_*
+src/main/resources/*
