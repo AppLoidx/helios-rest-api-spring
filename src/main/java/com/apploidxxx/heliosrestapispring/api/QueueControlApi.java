@@ -1,18 +1,16 @@
 package com.apploidxxx.heliosrestapispring.api;
 
-import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,9 +34,9 @@ public class QueueControlApi {
         this.sessionRepository = sessionRepository;
     }
 
-    // TODO: rename queueId to queue_name !WARNING see web-application
     @PutMapping
-    public @ResponseBody Object action(
+    public @ResponseBody
+    Object action(
             HttpServletResponse response,
 
             @PathVariable("queueId") String queueId,
@@ -52,76 +50,68 @@ public class QueueControlApi {
             @RequestParam(value = "type", required = false) String newType,
 
             @ApiParam(value = "Required for 'setadmin' action")
-            @RequestParam(value = "admin", required = false) String newAdmin){
+            @RequestParam(value = "admin", required = false) String newAdmin) {
 
 
-        User user;
-        if ((user = this.sessionRepository.findByAccessToken(accessToken).getUser()) == null ){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            // TODO: template for invalid_token
-            return new ErrorMessage("invalid_token", "your token expired");
-        }
+        User user = this.sessionRepository.findByAccessToken(accessToken).getUser();
+        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
 
-        Queue queue;
-        if ((queue = this.queueRepository.findByName(queueId)) == null){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("queue_not_found", "Queue with name " + queueId + " not found");
-        }
+        Queue queue = this.queueRepository.findByName(queueId);
+        if (queue == null) return ErrorResponseFactory.getInvalidParamErrorResponse("queue not found", response);
 
-        if (!queue.getSuperUsers().contains(user)){
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return null;
-        }
+
+        if (!queue.getSuperUsers().contains(user))
+            return ErrorResponseFactory.getForbiddenErrorResponse("enough permissions to manage this queue", response);
+
 
         action = action.toLowerCase();
-        switch (action){
-            case "shuffle": return shuffle(queue, user, response);
-            case "settype": return setType(newType, queue, user, response);
-            case "setadmin": return setAdmin(newAdmin, queue, response);
+        switch (action) {
+            case "shuffle":
+                return shuffle(queue, user);
+            case "settype":
+                return setType(newType, queue, user, response);
+            case "setadmin":
+                return setAdmin(newAdmin, queue, response);
             default:
                 return ErrorResponseFactory.getInvalidParamErrorResponse("Invalid action param. Please, check allowed actions", response);
         }
     }
 
-    private Object shuffle(Queue queue, User byUser, HttpServletResponse response){
-        try {
-            queue.shuffle();
-            queue.getNotifications().add(new Notification(byUser, "Очередь перемешана"));
-            this.queueRepository.save(queue);
-        } catch (Exception e){
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return new ErrorMessage("internal_server_error", "Error during shuffle queue");
-        }
-        response.setStatus(HttpServletResponse.SC_OK);
+    private Object shuffle(Queue queue, User byUser) {
+
+        queue.shuffle();
+        queue.getNotifications().add(new Notification(byUser, "Очередь перемешана"));
+        this.queueRepository.save(queue);
+
         return queue;
     }
 
-    private Object setType(String newType, Queue queue, User byUser, HttpServletResponse response){
-        if (newType == null) return ErrorResponseFactory.getInvalidParamErrorResponse("You should add a type param", response);
+    private Object setType(String newType, Queue queue, User byUser, HttpServletResponse response) {
+        if (newType == null)
+            return ErrorResponseFactory.getInvalidParamErrorResponse("You should add a type param", response);
 
-        if (queue.setGenerationType(newType)){
+        if (queue.setGenerationType(newType)) {
             queue.getNotifications().add(new Notification(byUser, "Изменен тип генерации очереди на " + newType));
             this.queueRepository.save(queue);
-            response.setStatus(HttpServletResponse.SC_OK);
+
             return null;
         } else {
             return ErrorResponseFactory.getInvalidParamErrorResponse("Unknown type: " + newType + ". Please, check your request", response);
         }
     }
 
-    private Object setAdmin(String newAdmin, Queue queue, HttpServletResponse response){
-        if (newAdmin == null) return ErrorResponseFactory.getInvalidParamErrorResponse("You should add a type param", response);
+    private Object setAdmin(String newAdmin, Queue queue, HttpServletResponse response) {
+        if (newAdmin == null)
+            return ErrorResponseFactory.getInvalidParamErrorResponse("You should add a type param", response);
 
-        User newAdminUser;
+        User newAdminUser = this.userRepository.findByUsername(newAdmin);
 
-        if ((newAdminUser = this.userRepository.findByUsername(newAdmin)) == null ){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("user_not_found", "requested user not found");
-        }
+        if (newAdminUser == null)
+            return ErrorResponseFactory.getInvalidParamErrorResponse("user not found", response);
 
         queue.addSuperUser(newAdminUser);
         this.queueRepository.save(queue);
-        response.setStatus(HttpServletResponse.SC_OK);
+
         return null;
     }
 
