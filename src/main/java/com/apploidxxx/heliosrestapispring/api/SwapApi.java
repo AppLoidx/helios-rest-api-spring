@@ -1,25 +1,26 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 
-import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
-import org.springframework.stereotype.Controller;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Arthur Kupriyanov
  */
-@Controller
+@RestController
 @RequestMapping("/api/swap")
 public class SwapApi {
     private final UserRepository userRepository;
@@ -34,32 +35,32 @@ public class SwapApi {
 
     // TODO: Add priority selection !!!
 
+    @ApiOperation("Add swap request")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Users swapped"),
+            @ApiResponse(code = 201, message = "Successful request, but another user not confirmed it")
+    })
     @PostMapping(produces = "application/json")
-    public @ResponseBody Object requestSwap(
+    public Object requestSwap(
             HttpServletResponse response,
             @RequestParam("access_token") String accessToken,
             @RequestParam("target") String targetUsername,
             @RequestParam("queue_name") String queueName){
 
-        User user;
-        User targetUser;
-        Queue queue;
-        if ((user = this.sessionRepository.findByAccessToken(accessToken).getUser()) == null ||
-                (targetUser = this.userRepository.findByUsername(targetUsername)) == null ||
-                (queue = this.queueRepository.findByName(queueName)) == null){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        User user = this.sessionRepository.findByAccessToken(accessToken).getUser();
+        User targetUser = this.userRepository.findByUsername(targetUsername);
+        Queue queue = this.queueRepository.findByName(queueName);
+
+        if (user == null || targetUser == null || queue == null){
             return ErrorResponseFactory.getInvalidParamErrorResponse("entity(-ies) not found by passed params", response);
         }
 
-
         if (!queue.getMembers().contains(user) || !queue.getMembers().contains(targetUser)){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("user_not_found", "User not found in requested queue");
+            return ErrorResponseFactory.getInvalidParamErrorResponse("user_not_found", "User not found in requested queue", response);
         }
 
         if (user.equals(targetUser)){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("self_request", "You can't request to swap yourself");
+            return ErrorResponseFactory.getInvalidParamErrorResponse("self_request", "You can't request to swap yourself", response);
         }
 
         boolean isSwapped = queue.getSwapContainer().addSwapRequest(user , targetUser);
