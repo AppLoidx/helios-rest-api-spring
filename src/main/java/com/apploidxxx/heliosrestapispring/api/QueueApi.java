@@ -261,11 +261,11 @@ public class QueueApi {
     }
 
     private ErrorMessage prepareQueueNotFoundErrorResponse(HttpServletResponse response){
-        return ErrorResponseFactory.getNotFoundErrorResponse("queue_not_found", "queue with this params not found", response);
+        return ErrorResponseFactory.getInvalidParamErrorResponse("queue_not_found", "queue with this params not found", response);
     }
 
     private ErrorMessage prepareUserNotFoundErrorResponse(HttpServletResponse response){
-        return ErrorResponseFactory.getNotFoundErrorResponse("user_not_found", "User not found", response);
+        return ErrorResponseFactory.getInvalidParamErrorResponse("user_not_found", "User not found", response);
     }
 
     private ErrorMessage prepareForbiddenErrorResponse(HttpServletResponse response){
@@ -273,7 +273,7 @@ public class QueueApi {
     }
 
     private Notification prepareUserExitQueueNotification(User user){
-        return new Notification(null, "Пользователь " + user.getFirstName() + " " + user.getLastName() + " вышел из очереди");
+        return new Notification(null, String.format("Пользователь %s %s вышел из очереди",user.getFirstName(), user.getLastName()));
     }
 
     private Notification prepareUserWasDeletedFromQueue(User whoDelete, User whoWasDeleted){
