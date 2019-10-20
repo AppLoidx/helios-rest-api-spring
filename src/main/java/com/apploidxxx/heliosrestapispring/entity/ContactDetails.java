@@ -2,7 +2,6 @@ package com.apploidxxx.heliosrestapispring.entity;
 
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

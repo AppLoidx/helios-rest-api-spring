@@ -12,7 +12,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Arthur Kupriyanov
  */
 @Api("User's data")
-@Controller
+@RestController
 @RequestMapping(value = "/api/user", produces = "application/json")
 public class UserApi {
 
@@ -39,7 +38,7 @@ public class UserApi {
             @ApiResponse(code = 400, message = "Invalid params", response = ErrorMessage.class)
     })
     @GetMapping
-    public @ResponseBody Object getInfo(
+    public Object getInfo(
             HttpServletResponse response,
             @RequestParam("access_token") String token,
             @RequestParam(value = "username", required = false) String username) {
@@ -55,7 +54,6 @@ public class UserApi {
                 return ErrorResponseFactory.getInvalidParamErrorResponse("User with this username not found", response);
             }
         }
-
         return new UserInfo(user);
     }
 

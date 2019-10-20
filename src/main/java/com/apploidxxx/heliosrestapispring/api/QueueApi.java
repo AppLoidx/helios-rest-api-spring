@@ -177,8 +177,7 @@ public class QueueApi {
             @ApiResponse(code = 400, message = "Queue or user not found", response = ErrorMessage.class)
     })
     @DeleteMapping(produces = "application/json")
-    @Transactional
-    public @ResponseBody Object delete(
+    public Object delete(
             HttpServletResponse response,
 
             @RequestParam("queue_name") String queueName,

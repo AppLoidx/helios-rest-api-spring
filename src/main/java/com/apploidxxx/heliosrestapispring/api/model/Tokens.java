@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Tokens {
 
+    @JsonProperty("access_token")
     public final String token;
     public final String refreshToken;
 
