@@ -1,15 +1,17 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.api.exception.VulnerabilityException;
-import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.model.UserSettings;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.api.util.Password;
 import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
 import com.apploidxxx.heliosrestapispring.entity.Session;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
@@ -21,6 +23,7 @@ import java.net.URL;
 /**
  * @author Arthur Kupriyanov
  */
+@Api("Manage user settings")
 @RestController
 @RequestMapping("/api/settings/{username}")
 public class SettingsApi {
@@ -33,6 +36,7 @@ public class SettingsApi {
         this.sessionRepository = sessionRepository;
     }
 
+    @ApiOperation(value = "Get user's settings", response = UserSettings.class)
     @GetMapping(produces = "application/json")
     public Object getSettings(
             HttpServletResponse response,
@@ -41,7 +45,6 @@ public class SettingsApi {
     ){
         User user;
 
-
         if ((user = userRepository.findByUsername(username)) == null){
             return ErrorResponseFactory.getInvalidParamErrorResponse("User with this username not found", response);
         }
@@ -49,18 +52,25 @@ public class SettingsApi {
         Session userSession = sessionRepository.findByAccessToken(accessToken);
         if (userSession != null && userSession.getUser().equals(user)){
             return new UserSettings(user);
-        } else {
-            return ErrorResponseFactory.getForbiddenErrorResponse(response);
         }
+
+        return ErrorResponseFactory.getForbiddenErrorResponse(response);
+
     }
 
+    @ApiOperation("Change user's settings")
     @PutMapping(produces = "application/json")
     public Object changeSettings(
             HttpServletResponse response,
             @PathVariable("username") String username,
             @RequestParam("access_token") String accessToken,
+
+            @ApiParam("(img, username, password)")
             @RequestParam("property") String property,
+
             @RequestParam("value") String value,
+
+            @ApiParam("Old password needed if you want change password")
             @RequestParam(value = "password", required = false) String oldPassword
     ){
 
@@ -108,10 +118,8 @@ public class SettingsApi {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return new ErrorMessage("internal_server_error", e.getMessage());
+            return ErrorResponseFactory.getInternalServerError(e.getMessage(), response);
         }
-
 
         user.getContactDetails().setImg(value);
         userRepository.save(user);
@@ -120,9 +128,9 @@ public class SettingsApi {
 
     private Object changeUsername(User user, String value, HttpServletResponse response){
         User userExistCheck = userRepository.findByUsername(value);
-        if (userExistCheck != null){
+        if (userExistCheck != null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("This username already is taken", response);
-        }
+
         user.setUsername(value);
         userRepository.save(user);
         return null;
@@ -130,7 +138,7 @@ public class SettingsApi {
 
     private Object changeUserPassword(User user, String value, String oldPassword, HttpServletResponse response){
         if (Password.isEqual(oldPassword, user.getPassword())) {
-            user.setPassword(Password.hash(oldPassword));
+            user.setPassword(Password.hash(value));
             userRepository.save(user);
             return null;
         } else {
