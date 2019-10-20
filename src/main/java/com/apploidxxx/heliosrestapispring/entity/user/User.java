@@ -4,16 +4,19 @@ package com.apploidxxx.heliosrestapispring.entity.user;
 import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import com.apploidxxx.heliosrestapispring.entity.user.timeline.Timeline;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.bytebuddy.dynamic.scaffold.MethodGraph;
 
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 
@@ -37,6 +40,8 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.contactDetails = new ContactDetails();
+        this.badges = new LinkedHashSet<>();
+        this.timelines = new LinkedHashSet<>();
     }
     public User(String username, String password, String firstName, String lastName, String email){
         this(username, password, firstName, lastName);
@@ -93,6 +98,9 @@ public class User {
     @OneToMany
     private Set<Badge> badges;
 
+    @OneToMany
+    private Set<Timeline> timelines;
+
     /**
      *
      * @return очереди которые этот пользователь администрирует
@@ -119,11 +127,13 @@ public class User {
         return this.session==null?new Session():this.session;
     }
 
-
     @Override
     public String toString() {
         return "User{" +
-                "username='" + username + '\'' +
+                "userdata=" + userdata +
+                ", contactDetails=" + contactDetails +
+                ", username='" + username + '\'' +
+                ", groupName='" + groupName + '\'' +
                 ", password='" + password + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
