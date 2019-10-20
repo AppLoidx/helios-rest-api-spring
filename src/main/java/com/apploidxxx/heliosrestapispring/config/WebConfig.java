@@ -16,7 +16,6 @@ import java.io.IOException;
  * @author Arthur Kupriyanov
  */
 @Configuration
-@EnableWebMvc
 @Slf4j
 public class WebConfig {
     @Bean
