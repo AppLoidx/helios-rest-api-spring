@@ -2,15 +2,15 @@ package com.apploidxxx.heliosrestapispring.api;
 
 
 import com.apploidxxx.heliosrestapispring.api.exception.VulnerabilityException;
-import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.api.util.GroupChecker;
 import com.apploidxxx.heliosrestapispring.api.util.Password;
 import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetailsRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
-import org.springframework.stereotype.Controller;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +20,8 @@ import java.io.IOException;
 /**
  * @author Arthur Kupriyanov
  */
-@Controller
+@Api("User registration and deleting")
+@RestController
 @RequestMapping("/api/register")
 public class RegisterApi {
     private final ContactDetailsRepository contactDetailsRepository;
@@ -31,8 +32,9 @@ public class RegisterApi {
         this.userRepository = userRepository;
     }
 
+    @ApiOperation("Register a user")
     @PostMapping
-    public @ResponseBody Object register(
+    public Object register(
             HttpServletResponse response,
             @RequestParam("username") String username,
             @RequestParam("password") String password,
@@ -68,17 +70,17 @@ public class RegisterApi {
 
 
         try {
-            checkVulnerability(firstName, lastName, username, group);
+            VulnerabilityChecker.checkWord(firstName, lastName, username, group);
         } catch (VulnerabilityException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("vulnerability_warning", "sent params may have dangerous words");
+            return e.getResponse(response);
         }
 
         return saveNewUser(username, password, firstName, lastName, email, group, response, redirectUri, state);
     }
 
+    @ApiOperation("Delete user from system")
     @DeleteMapping(produces = "application/json")
-    public @ResponseBody Object deleteUser(
+    public Object deleteUser(
             HttpServletResponse response,
             @RequestParam("username") String username,
             @RequestParam("password") String password)
@@ -87,13 +89,12 @@ public class RegisterApi {
         if (user!=null && Password.isEqual(password, user.getPassword())) {
             this.userRepository.delete(user);
             return null;
-        } else {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return new ErrorMessage("invalid_credentials", "invalid username or password");
         }
+
+        return ErrorResponseFactory.getInvalidParamErrorResponse("invalid_credentials", "invalid username or password", response);
+
     }
 
-    // TODO: add redirect
     private Object saveNewUser(
             String username, String password, String firstName, String lastName, String email, String group,
             HttpServletResponse response, String redirectUri, String state
@@ -119,11 +120,5 @@ public class RegisterApi {
 
     private boolean emailExist(String email){
         return this.contactDetailsRepository.findByEmail(email) != null;
-    }
-
-    private void checkVulnerability(String ... args) throws VulnerabilityException {
-        for (String word : args){
-            VulnerabilityChecker.checkWord(word);
-        }
     }
 }
