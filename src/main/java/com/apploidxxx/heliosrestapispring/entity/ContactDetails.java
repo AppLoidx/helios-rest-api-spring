@@ -45,7 +45,7 @@ public class ContactDetails {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "contactDetails")
     private User user;
 
-    @Column(unique = true, nullable = true)
+    @Column(unique = true)
     private String email;
 
     @Column(unique = true)
