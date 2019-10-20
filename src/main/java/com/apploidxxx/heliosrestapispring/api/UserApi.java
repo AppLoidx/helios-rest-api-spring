@@ -4,7 +4,6 @@ package com.apploidxxx.heliosrestapispring.api;
 import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.model.UserInfo;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
-import com.apploidxxx.heliosrestapispring.api.util.GroupChecker;
 import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
