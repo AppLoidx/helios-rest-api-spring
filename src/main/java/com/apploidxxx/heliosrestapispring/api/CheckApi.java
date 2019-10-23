@@ -106,7 +106,8 @@ public class CheckApi {
         if (queueName == null) return ErrorResponseFactory.getInvalidParamErrorResponse("invalid queue_name param", response);
 
         Queue q = this.queueRepository.findByName(queueName);
-        return new Check(q != null && q.getPassword() != null);
+        if (q == null) return ErrorResponseFactory.getInvalidParamErrorResponse("queue not found", response);
+        return new Check(q.getPassword() != null);
     }
 
     private Object checkEmailExist(String email) {
