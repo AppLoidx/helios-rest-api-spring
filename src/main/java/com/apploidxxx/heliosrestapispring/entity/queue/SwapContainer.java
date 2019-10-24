@@ -29,7 +29,7 @@ public class SwapContainer {
     private Long id;
 
 
-    @OneToOne
+    @OneToOne(mappedBy = "swapContainer")
     private Queue queue;
 
     @ElementCollection(targetClass= User.class, fetch = FetchType.EAGER)
