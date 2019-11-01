@@ -7,9 +7,11 @@ import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRe
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.apploidxxx.heliosrestapispring.entity.user.UserType;
+import com.apploidxxx.heliosrestapispring.queue.QueueManager;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Arthur Kupriyanov
  */
 @Api("Controls of queue")
-@Controller
+@RestController
 @RequestMapping("/api/queue/{queueId}")
 public class QueueControlApi {
 
@@ -34,9 +36,37 @@ public class QueueControlApi {
         this.sessionRepository = sessionRepository;
     }
 
+    @ApiOperation("Init a user passed event")
+    @GetMapping
+    public Object nextUser(
+            HttpServletResponse response,
+            @PathVariable("queueId") String queueId,
+            @RequestParam("access_token") String accessToken,
+            @RequestParam(value = "username", required = false) String username
+    ){
+
+        User user = this.sessionRepository.findByAccessToken(accessToken).getUser();
+        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
+
+        Queue queue = this.queueRepository.findByName(queueId);
+        if (queue == null) return ErrorResponseFactory.getInvalidParamErrorResponse("queue not found", response);
+        if (queue.getMembers().isEmpty()) return ErrorResponseFactory.getInvalidParamErrorResponse("queue is empty", response);
+
+        // TODO: write this not to only single queue
+        if (!queue.getMembers().get(0).equals(user) && !isCanManageQueue(user, queue))
+            return ErrorResponseFactory.getForbiddenErrorResponse( "you are not in cursor to move", response);
+
+        Queue newQueue = QueueManager.nextUser(queue, user);
+        this.queueRepository.save(newQueue);
+        return newQueue;
+    }
+
+    private boolean isCanManageQueue(User user, Queue queue){
+        return queue.getSuperUsers().contains(user) || user.getUserType() == UserType.ADMIN || user.getUserType() == UserType.TEACHER;
+    }
+
     @PutMapping
-    public @ResponseBody
-    Object action(
+    public Object action(
             HttpServletResponse response,
 
             @PathVariable("queueId") String queueId,
