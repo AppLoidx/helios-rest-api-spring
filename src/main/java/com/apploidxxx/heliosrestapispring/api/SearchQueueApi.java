@@ -34,7 +34,7 @@ public class SearchQueueApi {
         this.sessionRepository = sessionRepository;
     }
 
-    @ApiOperation(value = "Get matching to queue_name queues",response = QueueShortInfo.class)
+    @ApiOperation(value = "Get matching to queue_name queues", response = QueueShortInfo.class, responseContainer = "List")
     @GetMapping(produces = "application/json")
     public Object searchQueue(
             HttpServletResponse response,
@@ -44,20 +44,20 @@ public class SearchQueueApi {
             @RequestParam("queue_name") String queueName
     ){
 
-        Session s = this.sessionRepository.findByAccessToken(accessToken);
-        if (s == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
+        Session session = this.sessionRepository.findByAccessToken(accessToken);
+        if (session == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
 
-        return queueMatch(queueName);
+        return queueMatch(queueName, session);
 
     }
 
-    private Object queueMatch(String queueName) {
+    private Object queueMatch(String queueName, Session session) {
 
         List<QueueShortInfo> queueNames = new ArrayList<>();
         for (Queue q : this.queueRepository.findAll()) {
             try {
                 if (isMatches(q, queueName)) {
-                    queueNames.add(new QueueShortInfo(q));
+                    queueNames.add(new QueueShortInfo(q, session.getUser()));
                 }
             } catch (PatternSyntaxException ignored) { }
         }

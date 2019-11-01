@@ -118,7 +118,7 @@ public class SettingsApi {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return ErrorResponseFactory.getInternalServerError(e.getMessage(), response);
+            return ErrorResponseFactory.getInvalidParamErrorResponse(e.getMessage(), response);
         }
 
         user.getContactDetails().setImg(value);
