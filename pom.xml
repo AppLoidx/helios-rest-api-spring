@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.apploidxxx</groupId>
     <artifactId>helios-rest-api-spring</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
     <name>helios-rest-api-spring</name>
     <description>Helios REST API on Spring Boot</description>
 
