@@ -17,6 +17,7 @@ import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -28,7 +29,7 @@ import java.util.Set;
  */
 @Table(name="users")
 @Entity
-@EqualsAndHashCode(exclude = {"queueMember", "queueSuper"})
+@EqualsAndHashCode(exclude = {"queueMember", "queueSuper", "timelines"})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -98,7 +99,7 @@ public class User {
     @OneToMany
     private Set<Badge> badges;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<Timeline> timelines;
 
     /**
