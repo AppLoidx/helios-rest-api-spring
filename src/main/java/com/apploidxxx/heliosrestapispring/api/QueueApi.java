@@ -5,7 +5,9 @@ package com.apploidxxx.heliosrestapispring.api;
 import com.apploidxxx.heliosrestapispring.api.exception.VulnerabilityException;
 import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
+import com.apploidxxx.heliosrestapispring.api.util.TimelineManager;
 import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
+import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 
 // TODO: Add user filter by group
@@ -103,6 +107,7 @@ public class QueueApi {
 
         addNewUserToQueue(queue, user);
         this.queueRepository.save(queue);
+        this.userRepository.save(user);
 
         return null;
     }
@@ -113,11 +118,12 @@ public class QueueApi {
     }
 
     private void addNewUserNotification(Queue queue, User user){
-        queue.getNotifications()
-                .add(new Notification(
-                        user,
-                        String.format("Пользователь %s %s присоеденился к очереди", user.getFirstName(), user.getLastName())
-                ));
+        queue.getNotifications().add(prepareUserJoinedQueueNotification(user));
+        addJoinedQueueTimeline(user , queue);
+    }
+
+    private void addJoinedQueueTimeline(User user, Queue queue){
+        TimelineManager.addQueueJoinedTimeline(user, queue);
     }
 
     private ErrorMessage getForbiddenErrorResponse(HttpServletResponse response){
@@ -161,7 +167,9 @@ public class QueueApi {
 
         try {
             q.getNotifications().add(new Notification(null, "Создана очередь"));
+            TimelineManager.addQueueCreatedTimeline(user, q);
             this.queueRepository.save(q);
+            this.userRepository.save(user);
             return null;
         } catch (Exception e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -177,6 +185,7 @@ public class QueueApi {
             @ApiResponse(code = 400, message = "Queue or user not found", response = ErrorMessage.class)
     })
     @DeleteMapping(produces = "application/json")
+    @Transactional
     public Object delete(
             HttpServletResponse response,
 
@@ -191,8 +200,9 @@ public class QueueApi {
             @RequestParam("access_token") String token
     ) {
         target = target.toUpperCase();
+        Session session = this.sessionRepository.findByAccessToken(token);
+        if (session == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
         User user = this.sessionRepository.findByAccessToken(token).getUser();
-        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
 
         if (!target.matches("(USER)|(QUEUE)"))
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid_target", "Unknown target value", response);
@@ -244,7 +254,7 @@ public class QueueApi {
         if (delUser == null || !q.getMembers().contains(delUser)) return prepareUserNotFoundErrorResponse(response);
 
         q.getMembers().remove(delUser);
-        q.getNotifications().add(prepareUserWasDeletedFromQueue(user, delUser));
+        q.getNotifications().add(prepareUserWasDeletedFromQueueNotification(user, delUser));
         this.queueRepository.save(q);
         return null;
     }
@@ -255,7 +265,10 @@ public class QueueApi {
 
         if (q == null) return prepareQueueNotFoundErrorResponse(response);
         if (!q.getSuperUsers().contains(user)) return prepareForbiddenErrorResponse(response);
-        this.queueRepository.deleteById(q.getName());
+        List<Queue> list = new ArrayList<>();
+        list.add(q);
+        this.queueRepository.deleteInBatch(list);
+
         return null;
     }
 
@@ -275,7 +288,13 @@ public class QueueApi {
         return new Notification(null, String.format("Пользователь %s %s вышел из очереди",user.getFirstName(), user.getLastName()));
     }
 
-    private Notification prepareUserWasDeletedFromQueue(User whoDelete, User whoWasDeleted){
+    private Notification prepareUserWasDeletedFromQueueNotification(User whoDelete, User whoWasDeleted){
         return new Notification(whoDelete, "Пользователь " + whoWasDeleted.getFirstName() + " " + whoWasDeleted.getLastName() + " был удален из очереди");
     }
+
+    private Notification prepareUserJoinedQueueNotification(User user){
+        return new Notification(user, String.format("Пользователь %s %s присоеденился к очереди", user.getFirstName(), user.getLastName()));
+    }
+
+
 }
