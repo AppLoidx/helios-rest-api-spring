@@ -70,6 +70,7 @@ public class SwapContainer {
     public List<User> getUserRequests(User user){
         List<User> users = new ArrayList<>();
         for (User u : swapMap.keySet()){
+            if (!swapMap.containsKey(u)) continue;
             if (swapMap.get(u).equals(user)){
                 users.add(u);
             }
