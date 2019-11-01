@@ -28,15 +28,22 @@ public class Queue implements Serializable {
     public Queue(String name, String fullname){
         this.name = name;
         this.creationDate = new Date();
-        this.queueSequence = new LinkedList<>();
         this.chat = new Chat(this);
         this.fullname = fullname;
         this.notifications = new TreeSet<>();
         this.swapContainer = new SwapContainer(this);
     }
+
+    public Queue(String name, String fullname, QueueType queueType){
+        this(name, fullname);
+        this.queueType = queueType;
+    }
+
     public Queue(String name){
         this(name, name);
     }
+
+    private QueueType queueType = QueueType.SINGLE;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column
@@ -55,12 +62,12 @@ public class Queue implements Serializable {
     @Column(name = "fullname")
     private String fullname;
 
+    @OrderColumn
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="QUEUE_MEMBERS",
             joinColumns = {@JoinColumn(name="queue_name")},
             inverseJoinColumns={@JoinColumn(name="users_id")})
-
-    private Set<User> members;
+    private List<User> members;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name="QUEUE_SUPER_USERS",
@@ -68,21 +75,14 @@ public class Queue implements Serializable {
             inverseJoinColumns={@JoinColumn(name="super_users")})
     private Set<User> superUsers;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @OneToOne(cascade = CascadeType.ALL, optional = false, orphanRemoval = true)
     @JsonIgnore
     private Chat chat;
-
-
-    // TODO: rewrite to user
-    @OrderColumn(nullable = false)
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(joinColumns = @JoinColumn(name = "queue_name"))
-    private List<Long> queueSequence;
 
     @Column
     private String description;
 
-    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Notification> notifications;
 
     @OneToOne(fetch =  FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -113,54 +113,44 @@ public class Queue implements Serializable {
     }
 
     public void addUser(User u){
-        if (members==null) members= new HashSet<>();
+        if (members == null){
+            members = new LinkedList<>();
+        }
         members.add(u);
-        if (!queueSequence.contains(u.getId()))
-        queueSequence.add(u.getId());
+
     }
 
     public void deleteUser(User u){
         if (members==null) return;
         members.remove(u);
-        queueSequence.remove(u.getId());
     }
 
     public void shuffle(){
-        Collections.shuffle(this.queueSequence);
+        Collections.shuffle(members);
     }
 
     void swap(User user1, User user2 ) throws IndexOutOfBoundsException{
         int firstIndex = -1;
         int secondIndex = -1;
         int index = 0;
-        for (Long i : queueSequence){
-            if (user1.getId().equals(i)) firstIndex = index;
-            if (user2.getId().equals(i)) secondIndex= index;
+        for (User user : members){
+            if (user1.equals(user)) firstIndex  = index;
+            if (user2.equals(user)) secondIndex = index;
 
             index++;
         }
 
-        Collections.swap(queueSequence, firstIndex, secondIndex);
+        Collections.swap(members, firstIndex, secondIndex);
     }
 
     public List<User> getMembersList() {
-        Map<Long, User> mapping = new HashMap<>();
-        for (User u : members){
-            mapping.put(u.getId(), u);
-        }
-        List<User> users = new LinkedList<>();
-        for (Long id : queueSequence){
-            users.add(mapping.get(id));
-        }
-        return users;
+        return members;
     }
 
     public Set<Notification> getNotifications(){
         if (this.notifications == null) this.notifications = new TreeSet<>();
         return this.notifications;
     }
-
-
 
     /**
      * Установка значения generation type через String
@@ -178,5 +168,15 @@ public class Queue implements Serializable {
             this.generationType = newGenerationType;
             return true;
         }
+    }
+    @Transient
+    @JsonProperty("queue_sequence")
+    public List<Long> getQueueSequence(){
+        List<Long> longList = new LinkedList<>();
+        for (User u : members){
+            longList.add(u.getId());
+        }
+
+        return longList;
     }
 }
