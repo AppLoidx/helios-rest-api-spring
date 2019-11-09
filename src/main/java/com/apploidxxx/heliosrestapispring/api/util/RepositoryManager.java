@@ -9,12 +9,14 @@ import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepositor
 import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Arthur Kupriyanov
  */
 @Component
+@Getter
 public class RepositoryManager {
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
@@ -31,13 +33,25 @@ public class RepositoryManager {
         return new UserFind();
     }
 
+    public boolean isUserExist(String username){
+        return new UserFind().byUsername(username) != null;
+    }
+
+    public void saveUser(User user){
+        this.userRepository.save(user);
+    }
+    public void saveQueue(Queue queue) { this.queueRepository.save(queue); }
+    public void deleteUser(User user){
+        this.userRepository.delete(user);
+    }
+
     public QueueFind getQueue() throws PersistenceException {
         return new QueueFind();
     }
 
-    class UserFind{
+    public class UserFind{
 
-        public User byUsername(String username){
+        public User byUsername(String username) throws EntityNotFoundException{
             User user = userRepository.findByUsername(username);
             checkEntityIsNotNull(user);
             return user;
@@ -52,7 +66,7 @@ public class RepositoryManager {
         }
     }
 
-    class QueueFind{
+    public class QueueFind{
         public Queue byQueueName(String queueName){
             Queue queue = queueRepository.findByName(queueName);
             checkEntityIsNotNull(queue);
