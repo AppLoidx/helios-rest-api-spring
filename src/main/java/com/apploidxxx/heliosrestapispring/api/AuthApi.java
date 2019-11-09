@@ -7,15 +7,18 @@ import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.api.util.Password;
 import com.apploidxxx.heliosrestapispring.entity.AuthorizationCode;
 import com.apploidxxx.heliosrestapispring.entity.Session;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.AuthorizationCodeRepository;
+import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
-import io.swagger.annotations.*;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
 
@@ -28,10 +31,12 @@ import java.io.IOException;
 public class AuthApi {
     private final UserRepository userRepository;
     private final AuthorizationCodeRepository authorizationCodeRepository;
+    private final SessionRepository sessionRepository;
 
-    public AuthApi(UserRepository userRepository, AuthorizationCodeRepository authorizationCodeRepository) {
+    public AuthApi(UserRepository userRepository, AuthorizationCodeRepository authorizationCodeRepository, SessionRepository sessionRepository) {
         this.userRepository = userRepository;
         this.authorizationCodeRepository = authorizationCodeRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @ApiOperation(value = "Authorize with user's login and password")
@@ -74,9 +79,9 @@ public class AuthApi {
 
         User user = this.userRepository.findByUsername(username);
 
-        if (checkAuth(user, password)) return unauthorizedErrorMessage(response);
+        if (checkIsNotAuthenticated(user, password)) return unauthorizedErrorMessage(response);
 
-        Session s = setUserSession(user);
+        Session s = setUserSessionAndSave(user);
 
         if (redirectUri == null) return generateTokens(s, response);
 
@@ -87,7 +92,7 @@ public class AuthApi {
         return null;
     }
 
-    private boolean checkAuth(User user, String password){
+    private boolean checkIsNotAuthenticated(User user, String password){
         return user == null || !Password.isEqual(password, user.getPassword());
     }
 
@@ -97,7 +102,7 @@ public class AuthApi {
                         ("invalid_credentials", "invalid login or password", response);
     }
 
-    private Session setUserSession(User user) {
+    private Session setUserSessionAndSave(User user) {
 
         Session s = user.getSession();
         s.generateSession(user);
@@ -114,6 +119,24 @@ public class AuthApi {
 
     private String prepareRedirectUri(String redirectUri, String authCode, String state){
         return String.format(redirectUri + "?authorization_code=%s&state=%s", authCode, state==null?"state":state);
+    }
+
+    @ApiOperation("Check authentication and validate access token")
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public Object validateAuth(
+            HttpServletResponse response,
+            @RequestParam("access_token") String accessToken
+    ){
+        System.out.println("User access token: " + accessToken);
+        boolean isAuthorized = this.sessionRepository.findByAccessToken(accessToken) != null;
+
+        if (isAuthorized){
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            return ErrorResponseFactory.getUnauthorizedErrorResponse("unauthorized", "your token is expired or invalid", response);
+        }
+
+        return null;
     }
 
 }
