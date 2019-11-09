@@ -1,13 +1,14 @@
 package com.apploidxxx.heliosrestapispring.api.oauth.google;
 
 
-import com.apploidxxx.heliosrestapispring.util.PropertyManager;
 import com.apploidxxx.heliosrestapispring.api.model.AuthorizationCodeModel;
 import com.apploidxxx.heliosrestapispring.entity.AuthorizationCode;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.AuthorizationCodeRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetailsRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.apploidxxx.heliosrestapispring.util.PropertyManager;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -63,8 +64,9 @@ public class GoogleOAuthApi {
         final String FAMILY_NAME = (String) payload.get("family_name");
         final String GIVEN_NAME = (String) payload.get("given_name");
 
-        User user = this.contactDetailsRepository.findByEmail(EMAIL).getUser();
-
+        User user = null;
+        ContactDetails cd = this.contactDetailsRepository.findByEmail(EMAIL);
+        if (cd != null) user = cd.getUser();
         if (user == null) user = createNewUser(EMAIL, GIVEN_NAME, FAMILY_NAME, EMAIL, PICTURE);
 
         response.setStatus(HttpServletResponse.SC_OK);
