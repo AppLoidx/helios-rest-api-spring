@@ -129,7 +129,7 @@ public class Queue implements Serializable {
         Collections.shuffle(members);
     }
 
-    void swap(User user1, User user2 ) throws IndexOutOfBoundsException{
+    public void swap(User user1, User user2 ) throws IndexOutOfBoundsException{
         int firstIndex = -1;
         int secondIndex = -1;
         int index = 0;
