@@ -1,10 +1,10 @@
 package com.apploidxxx.heliosrestapispring.api.model;
 
 
-import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.queue.SwapContainer;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -21,17 +21,40 @@ import java.util.*;
 public class UserInfo implements Serializable {
     private User user;
 
-    private  List<Map<String, String>> queues;
-    private  List<Map<String, String>> queuesMember;
+    private List<Map<String, String>> queues;
+    private List<Map<String, String>> queuesMember;
 
     private List<Map<String, String>> swapRequestsIn;
     private List<Map<String, String>> swapRequestsOut;
+
+    private List<Map<String, String>> groups;
+    private List<Map<String, String>> groupsMember;
 
     public UserInfo(User user){
         this.user = user;
         this.swapRequestsIn = new ArrayList<>();
         this.swapRequestsOut = new ArrayList<>();
         initQueues(user);
+        initGroups(user);
+    }
+
+    private void initGroups(User user){
+        this.groups = new ArrayList<>();
+        this.groupsMember = new ArrayList<>();
+
+        for (UsersGroup usersGroup : user.getUsersGroupSuper()){
+            Map<String, String> map = new HashMap<>();
+            map.put("group_name", usersGroup.getName());
+            map.put("group_fullname", usersGroup.getFullname());
+            this.groupsMember.add(map);
+        }
+
+        for (UsersGroup usersGroup : user.getUsersGroups()){
+            Map<String, String> map = new HashMap<>();
+            map.put("group_name", usersGroup.getName());
+            map.put("group_fullname", usersGroup.getFullname());
+            this.groupsMember.add(map);
+        }
     }
 
     private void initQueues(User user){
