@@ -3,21 +3,18 @@ package com.apploidxxx.heliosrestapispring.entity.user;
 
 import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.Session;
+import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.user.timeline.Timeline;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.bytebuddy.dynamic.scaffold.MethodGraph;
-
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -29,7 +26,6 @@ import java.util.Set;
  */
 @Table(name="users")
 @Entity
-@EqualsAndHashCode(exclude = {"queueMember", "queueSuper", "timelines"})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -44,10 +40,12 @@ public class User {
         this.badges = new LinkedHashSet<>();
         this.timelines = new LinkedHashSet<>();
     }
+
     public User(String username, String password, String firstName, String lastName, String email){
         this(username, password, firstName, lastName);
         this.contactDetails.setEmail(email);
     }
+
     public User(String username, String password, String firstName, String lastName, String email, String group){
         this(username, password, firstName, lastName, email);
         this.groupName = group;
@@ -102,6 +100,14 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Timeline> timelines;
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
+    private Set<UsersGroup> usersGroups;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "groupSuperUsers", fetch = FetchType.EAGER)
+    private Set<UsersGroup> usersGroupSuper;
+
     /**
      *
      * @return очереди которые этот пользователь администрирует
@@ -111,6 +117,19 @@ public class User {
             queueSuper = new HashSet<>();
         }
         return queueSuper;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     /**
