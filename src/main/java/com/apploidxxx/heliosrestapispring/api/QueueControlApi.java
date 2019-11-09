@@ -1,9 +1,7 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
+import com.apploidxxx.heliosrestapispring.api.util.RepositoryManager;
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
@@ -26,14 +24,12 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/api/queue/{queueId}")
 public class QueueControlApi {
 
-    private final QueueRepository queueRepository;
-    private final UserRepository userRepository;
-    private final SessionRepository sessionRepository;
 
-    public QueueControlApi(QueueRepository queueRepository, UserRepository userRepository, SessionRepository sessionRepository) {
-        this.queueRepository = queueRepository;
-        this.userRepository = userRepository;
-        this.sessionRepository = sessionRepository;
+    private final RepositoryManager repositoryManager;
+
+    public QueueControlApi(RepositoryManager repositoryManager) {
+
+        this.repositoryManager = repositoryManager;
     }
 
     @ApiOperation("Init a user passed event")
@@ -41,23 +37,20 @@ public class QueueControlApi {
     public Object nextUser(
             HttpServletResponse response,
             @PathVariable("queueId") String queueId,
-            @RequestParam("access_token") String accessToken,
-            @RequestParam(value = "username", required = false) String username
+            @RequestParam("access_token") String accessToken
     ){
 
-        User user = this.sessionRepository.findByAccessToken(accessToken).getUser();
-        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
+        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
 
-        Queue queue = this.queueRepository.findByName(queueId);
-        if (queue == null) return ErrorResponseFactory.getInvalidParamErrorResponse("queue not found", response);
+        Queue queue = this.repositoryManager.getQueue().byQueueName(queueId);
+
         if (queue.getMembers().isEmpty()) return ErrorResponseFactory.getInvalidParamErrorResponse("queue is empty", response);
 
-        // TODO: write this not to only single queue
         if (!queue.getMembers().get(0).equals(user) && !isCanManageQueue(user, queue))
             return ErrorResponseFactory.getForbiddenErrorResponse( "you are not in cursor to move", response);
 
         Queue newQueue = QueueManager.nextUser(queue, user);
-        this.queueRepository.save(newQueue);
+        this.repositoryManager.saveQueue(newQueue);
         return newQueue;
     }
 
@@ -71,7 +64,7 @@ public class QueueControlApi {
 
             @PathVariable("queueId") String queueId,
 
-            @ApiParam(value = "Action type: (shuffle, settype, setadmin)", required = true)
+            @ApiParam(value = "Action type: (shuffle, settype, setadmin, clearnotifications)", required = true)
             @RequestParam("action") String action,
 
             @RequestParam("access_token") String accessToken,
@@ -83,11 +76,8 @@ public class QueueControlApi {
             @RequestParam(value = "admin", required = false) String newAdmin) {
 
 
-        User user = this.sessionRepository.findByAccessToken(accessToken).getUser();
-        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
-
-        Queue queue = this.queueRepository.findByName(queueId);
-        if (queue == null) return ErrorResponseFactory.getInvalidParamErrorResponse("queue not found", response);
+        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
+        Queue queue = this.repositoryManager.getQueue().byQueueName(queueId);
 
 
         if (!queue.getSuperUsers().contains(user))
@@ -102,6 +92,8 @@ public class QueueControlApi {
                 return setType(newType, queue, user, response);
             case "setadmin":
                 return setAdmin(newAdmin, queue, response);
+            case "clearnotifications":
+                return clearNotifications(queue, user, response);
             default:
                 return ErrorResponseFactory.getInvalidParamErrorResponse("Invalid action param. Please, check allowed actions", response);
         }
@@ -111,7 +103,7 @@ public class QueueControlApi {
 
         queue.shuffle();
         queue.getNotifications().add(new Notification(byUser, "Очередь перемешана"));
-        this.queueRepository.save(queue);
+        this.repositoryManager.saveQueue(queue);
 
         return queue;
     }
@@ -122,7 +114,7 @@ public class QueueControlApi {
 
         if (queue.setGenerationType(newType)) {
             queue.getNotifications().add(new Notification(byUser, "Изменен тип генерации очереди на " + newType));
-            this.queueRepository.save(queue);
+            this.repositoryManager.saveQueue(queue);
 
             return null;
         } else {
@@ -134,15 +126,26 @@ public class QueueControlApi {
         if (newAdmin == null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("You should add a type param", response);
 
-        User newAdminUser = this.userRepository.findByUsername(newAdmin);
+        User newAdminUser = this.repositoryManager.getUser().byUsername(newAdmin);
 
         if (newAdminUser == null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("user not found", response);
 
         queue.addSuperUser(newAdminUser);
-        this.queueRepository.save(queue);
+        this.repositoryManager.saveQueue(queue);
 
         return null;
+    }
+
+    private Object clearNotifications(Queue queue, User byUser, HttpServletResponse response){
+        if ( queue.getSuperUsers().contains(byUser) || byUser.getUserType() == UserType.ADMIN){
+            queue.getNotifications().clear();
+            queue.getNotifications().add(new Notification(null, "История очищена"));
+            this.repositoryManager.saveQueue(queue);
+            return null;
+        } else {
+            return ErrorResponseFactory.getForbiddenErrorResponse(response);
+        }
     }
 
 
