@@ -108,7 +108,7 @@ public class Queue implements Serializable {
     }
 
     public void deleteSuperUser(User u){
-        if (members==null) return;
+        if (superUsers == null) return;
         superUsers.remove(u);
     }
 
@@ -121,7 +121,7 @@ public class Queue implements Serializable {
     }
 
     public void deleteUser(User u){
-        if (members==null) return;
+        if (members == null) return;
         members.remove(u);
     }
 
