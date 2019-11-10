@@ -94,6 +94,8 @@ public class QueueControlApi {
                 return setAdmin(newAdmin, queue, response);
             case "clearnotifications":
                 return clearNotifications(queue, user, response);
+            case "setstarted":
+                return setStarted(queue);
             default:
                 return ErrorResponseFactory.getInvalidParamErrorResponse("Invalid action param. Please, check allowed actions", response);
         }
@@ -146,6 +148,14 @@ public class QueueControlApi {
         } else {
             return ErrorResponseFactory.getForbiddenErrorResponse(response);
         }
+    }
+
+    private Object setStarted(Queue queue) {
+
+        queue.setStarted(!queue.isStarted());
+        this.repositoryManager.saveQueue(queue);
+
+        return queue;
     }
 
 
