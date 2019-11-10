@@ -5,14 +5,17 @@ import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.model.UserInfo;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.entity.Session;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 

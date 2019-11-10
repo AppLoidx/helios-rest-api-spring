@@ -1,10 +1,8 @@
 package com.apploidxxx.heliosrestapispring.api.oauth.vk;
 
 import com.apploidxxx.heliosrestapispring.util.PropertyManager;
-import org.jboss.logging.Logger;
 
 import java.io.IOException;
-import java.util.Properties;
 
 /**
  * @author Arthur Kupriyanov

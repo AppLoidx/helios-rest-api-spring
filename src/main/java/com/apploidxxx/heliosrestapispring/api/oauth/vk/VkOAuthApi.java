@@ -1,15 +1,14 @@
 package com.apploidxxx.heliosrestapispring.api.oauth.vk;
 
 import com.apploidxxx.heliosrestapispring.api.oauth.vk.model.AccessToken;
-
 import com.apploidxxx.heliosrestapispring.api.oauth.vk.model.UserInfo;
 import com.apploidxxx.heliosrestapispring.api.oauth.vk.model.VkUser;
 import com.apploidxxx.heliosrestapispring.entity.AuthorizationCode;
 import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.AuthorizationCodeRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetailsRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
 

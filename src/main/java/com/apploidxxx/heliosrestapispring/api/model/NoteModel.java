@@ -2,7 +2,6 @@ package com.apploidxxx.heliosrestapispring.api.model;
 
 
 import com.apploidxxx.heliosrestapispring.entity.note.Note;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.NoArgsConstructor;
 
 

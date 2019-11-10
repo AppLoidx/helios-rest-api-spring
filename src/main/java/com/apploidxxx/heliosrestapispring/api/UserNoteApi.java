@@ -5,18 +5,17 @@ import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.model.NoteModel;
 import com.apploidxxx.heliosrestapispring.api.model.UserNotes;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
-import com.apploidxxx.heliosrestapispring.entity.user.UserType;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.note.NoteRepository;
 import com.apploidxxx.heliosrestapispring.entity.note.Note;
 import com.apploidxxx.heliosrestapispring.entity.note.NoteType;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.apploidxxx.heliosrestapispring.entity.user.UserType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.Optional;
 
 /**

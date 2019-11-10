@@ -1,9 +1,5 @@
 package com.apploidxxx.heliosrestapispring.api.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-
 /**
  *
  * POJO объект для сообщений об ошибке

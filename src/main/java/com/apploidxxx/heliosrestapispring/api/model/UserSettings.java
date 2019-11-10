@@ -3,7 +3,6 @@ package com.apploidxxx.heliosrestapispring.api.model;
 import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**

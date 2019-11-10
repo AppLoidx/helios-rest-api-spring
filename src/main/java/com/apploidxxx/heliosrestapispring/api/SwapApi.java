@@ -56,7 +56,6 @@ public class SwapApi {
         if (queue.getSwapContainer().hasRequest(user) != null) return ErrorResponseFactory.getInvalidParamErrorResponse("you already requested this user to swap", response);
         boolean isSwapped = queue.getSwapContainer().addSwapRequest(user , targetUser);
         this.repositoryManager.saveQueue(queue);
-
         // 200 (ok) - users swapped
         // 202 (accepted) - user's request was successful, but not mutually
         if (isSwapped) response.setStatus(HttpServletResponse.SC_OK);
