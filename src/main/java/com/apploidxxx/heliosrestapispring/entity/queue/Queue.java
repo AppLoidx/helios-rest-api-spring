@@ -1,8 +1,9 @@
 package com.apploidxxx.heliosrestapispring.entity.queue;
 
 
-
 import com.apploidxxx.heliosrestapispring.entity.Chat;
+import com.apploidxxx.heliosrestapispring.entity.queue.session.QueueSession;
+import com.apploidxxx.heliosrestapispring.entity.queue.session.statistic.UserPassData;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,6 +51,9 @@ public class Queue implements Serializable {
     private Date creationDate;
 
     @Column
+    private boolean started;
+
+    @Column
     private GenerationType generationType;
 
     @Column
@@ -87,6 +91,12 @@ public class Queue implements Serializable {
 
     @OneToOne(fetch =  FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private SwapContainer swapContainer;
+
+    @OneToOne
+    private QueueSession queueSession = new QueueSession();
+
+    @OneToMany(mappedBy = "queue")
+    private Set<UserPassData> userPassDataSet = new HashSet<>();
 
     public String getName() {
         return name;

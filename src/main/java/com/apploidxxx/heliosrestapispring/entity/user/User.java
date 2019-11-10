@@ -5,6 +5,7 @@ import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import com.apploidxxx.heliosrestapispring.entity.queue.session.statistic.UserPassData;
 import com.apploidxxx.heliosrestapispring.entity.user.timeline.Timeline;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -107,6 +108,9 @@ public class User {
     @JsonIgnore
     @ManyToMany(mappedBy = "groupSuperUsers", fetch = FetchType.EAGER)
     private Set<UsersGroup> usersGroupSuper;
+
+    @OneToMany
+    private Set<UserPassData> userPassDataSet = new LinkedHashSet<>();
 
     /**
      *
