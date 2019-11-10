@@ -2,9 +2,7 @@ package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.api.util.BadgesFactory;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
-import com.apploidxxx.heliosrestapispring.entity.Session;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
+import com.apploidxxx.heliosrestapispring.api.util.RepositoryManager;
 import com.apploidxxx.heliosrestapispring.entity.user.Badge;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.apploidxxx.heliosrestapispring.entity.user.UserType;
@@ -21,12 +19,10 @@ import java.util.Set;
 @RequestMapping("/api/badges")
 @RestController
 public class BadgesApi {
-    private final SessionRepository sessionRepository;
-    private final UserRepository userRepository;
+    private final RepositoryManager repositoryManager;
 
-    public BadgesApi(SessionRepository sessionRepository, UserRepository userRepository) {
-        this.sessionRepository = sessionRepository;
-        this.userRepository = userRepository;
+    public BadgesApi( RepositoryManager repositoryManager) {
+        this.repositoryManager = repositoryManager;
     }
 
     @ApiOperation(value = "Get user badges", response = Set.class)
@@ -36,7 +32,6 @@ public class BadgesApi {
     })
     @GetMapping(produces = "application/json")
     public Object getBadges(
-            HttpServletResponse response,
 
             @ApiParam(value = "user's access token", required = true)
             @RequestParam("access_token") String accessToken,
@@ -45,17 +40,14 @@ public class BadgesApi {
             @RequestParam("username") String username
     ){
 
-        // !WARNING: if you want refactor these two lines be careful. We need to verify user with him access_token
-        Session session = sessionRepository.findByAccessToken(accessToken);
-        if (session == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
+        // ! WARNING: if you want refactor these two lines be careful. We need to verify user with him access_token
+        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
 
-        if (username == null) return session.getUser().getBadges();
+        if (username == null) return user.getBadges();
 
-        User user = userRepository.findByUsername(username);
+        user = this.repositoryManager.getUser().byUsername(username);
 
-        if (user != null) return user.getBadges();
-
-        return ErrorResponseFactory.getInvalidParamErrorResponse("User with this username not found", response);
+        return user.getBadges();
     }
 
     @ApiOperation("Add badge. Works with admins only")
@@ -75,23 +67,21 @@ public class BadgesApi {
 
     ){
 
-        Session session = this.sessionRepository.findByAccessToken(accessToken);
-        if (session == null )
-            return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
+        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
 
 
-        if (checkUserIsNotAdmin(session.getUser()))
+        if (checkUserIsNotAdmin(user))
             return ErrorResponseFactory.getForbiddenErrorResponse("Only admin can add badges", response);
 
 
-        User target = this.userRepository.findByUsername(username);
+        User target = this.repositoryManager.getUser().byUsername(username);
         BadgesFactory badgesFactory = BadgesFactory.getBadge(badgeName);
 
         if (badgesFactory == null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid badge name", response);
 
         addBadgeToUser(target, badgesFactory);
-        this.userRepository.save(target);
+        this.repositoryManager.saveUser(target);
 
         return null;
 
@@ -126,21 +116,19 @@ public class BadgesApi {
             @RequestParam("badge_name") String badgeName
     ){
 
-        Session session = sessionRepository.findByAccessToken(accessToken);
-        if (session == null)
-            return ErrorResponseFactory.getInvalidParamErrorResponse("invalid access token", response);
+        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
 
-        if (checkUserIsNotAdmin(session.getUser()))
+        if (checkUserIsNotAdmin(user))
             return ErrorResponseFactory.getForbiddenErrorResponse("Only admin can remove badges", response);
 
 
-        User target = userRepository.findByUsername(username);
+        User target = this.repositoryManager.getUser().byUsername(username);
         BadgesFactory badgesFactory = BadgesFactory.getBadge(badgeName);
         if (badgesFactory == null)
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid badge name", response);
 
         removeBadge(target, badgesFactory);
-        userRepository.save(target);
+        this.repositoryManager.saveUser(target);
         return null;
 
     }
