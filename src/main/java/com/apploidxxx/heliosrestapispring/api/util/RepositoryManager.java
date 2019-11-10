@@ -12,6 +12,8 @@ import com.apploidxxx.heliosrestapispring.entity.user.User;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author Arthur Kupriyanov
  */
@@ -47,6 +49,10 @@ public class RepositoryManager {
 
     public QueueFind getQueue() throws PersistenceException {
         return new QueueFind();
+    }
+
+    public void deleteQueue(List<Queue> list) {
+        this.queueRepository.deleteInBatch(list);
     }
 
     public class UserFind{
