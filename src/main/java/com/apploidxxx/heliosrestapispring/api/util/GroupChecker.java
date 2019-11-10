@@ -1,15 +1,14 @@
 package com.apploidxxx.heliosrestapispring.api.util;
 
 /**
- * Класс для работы с группами пользователя
- * (недописан)
+ * Utility-class для валидации группы
  *
  * @author Arthur Kupriyanov
  */
 public class GroupChecker {
 
     /**
-     * Проверить валидность группы (недописан)
+     * Проверяет валидность группы (недописан)
      * @param group идентификатор группы
      * @return валиден - true, иначе false
      */
