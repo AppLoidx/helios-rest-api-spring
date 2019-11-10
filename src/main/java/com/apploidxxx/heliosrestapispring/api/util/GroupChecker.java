@@ -13,6 +13,7 @@ public class GroupChecker {
      * @return валиден - true, иначе false
      */
     public static boolean isValid(String group){
+        // TODO: write group validation
         return true;
     }
 
