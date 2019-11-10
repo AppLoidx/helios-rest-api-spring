@@ -1,19 +1,15 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 
-
 import com.apploidxxx.heliosrestapispring.api.exception.VulnerabilityException;
 import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
+import com.apploidxxx.heliosrestapispring.api.util.RepositoryManager;
 import com.apploidxxx.heliosrestapispring.api.util.TimelineManager;
 import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
-import com.apploidxxx.heliosrestapispring.entity.Session;
-import com.apploidxxx.heliosrestapispring.entity.user.User;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.queue.QueueRepository;
 import com.apploidxxx.heliosrestapispring.entity.queue.Notification;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
+import com.apploidxxx.heliosrestapispring.entity.user.User;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,14 +31,11 @@ import java.util.List;
 @RequestMapping(value = "/api/queue", produces = "application/json")
 public class QueueApi {
 
-    private final UserRepository userRepository;
-    private final QueueRepository queueRepository;
-    private final SessionRepository sessionRepository;
+    private final RepositoryManager repositoryManager;
 
-    public QueueApi(UserRepository userRepository, QueueRepository queueRepository, SessionRepository sessionRepository) {
-        this.userRepository = userRepository;
-        this.queueRepository = queueRepository;
-        this.sessionRepository = sessionRepository;
+    public QueueApi(RepositoryManager repositoryManager) {
+
+        this.repositoryManager = repositoryManager;
     }
 
     @ApiOperation("Get queue")
@@ -52,17 +45,12 @@ public class QueueApi {
     })
     @GetMapping
     public Object getQueue(
-            HttpServletResponse response,
 
             @ApiParam(value = "Queue short name", required = true)
             @RequestParam("queue_name") String queueName
     ) {
-        Queue queue = this.queueRepository.findByName(queueName);
+        return this.repositoryManager.getQueue().byQueueName(queueName);
 
-        if (queue == null)
-            return ErrorResponseFactory.getNotFoundErrorResponse("queue_not_found", "Queue with this name not found", response);
-
-        return queue;
     }
 
     @ApiOperation("Get queue")
@@ -83,21 +71,16 @@ public class QueueApi {
             @RequestParam(value = "password", required = false) String password
     ) {
 
-        User user = sessionRepository.findByAccessToken(token).getUser();
-        if (user == null)
-            return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
+        User user = this.repositoryManager.getUser().byAccessToken(token);
 
-        Queue queue = this.queueRepository.findByName(queueName);
-        if (queue == null)
-            return ErrorResponseFactory.getNotFoundErrorResponse("queue_not_found", "Queue with this name not found", response);
-
+        Queue queue = this.repositoryManager.getQueue().byQueueName(queueName);
         if (queue.getMembers().contains(user))
             return ErrorResponseFactory.getInvalidParamErrorResponse("repeated_request", "you already in queue", response);
 
 
         if (queue.getPassword() == null){
             addNewUserToQueue(queue, user);
-            this.queueRepository.save(queue);
+            this.repositoryManager.saveQueue(queue);
 
             return null;
         }
@@ -106,8 +89,8 @@ public class QueueApi {
             return getForbiddenErrorResponse(response);
 
         addNewUserToQueue(queue, user);
-        this.queueRepository.save(queue);
-        this.userRepository.save(user);
+        this.repositoryManager.saveQueue(queue);
+        this.repositoryManager.saveUser(user);
 
         return null;
     }
@@ -140,7 +123,7 @@ public class QueueApi {
             HttpServletResponse response,
 
             @RequestParam("queue_name") String queueName,
-            @RequestParam("access_token") String token,
+            @RequestParam("access_token") String accessToken,
 
             @RequestParam("fullname") String fullname,
 
@@ -151,7 +134,7 @@ public class QueueApi {
             @RequestParam(value = "generation", required = false) String generationType
     ){
 
-        User user = this.sessionRepository.findByAccessToken(token).getUser();
+        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
         if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
 
         try {
@@ -168,8 +151,8 @@ public class QueueApi {
         try {
             q.getNotifications().add(new Notification(null, "Создана очередь"));
             TimelineManager.addQueueCreatedTimeline(user, q);
-            this.queueRepository.save(q);
-            this.userRepository.save(user);
+            this.repositoryManager.saveQueue(q);
+            this.repositoryManager.saveUser(user);
             return null;
         } catch (Exception e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -197,12 +180,10 @@ public class QueueApi {
             @ApiParam(value = "USER or QUEUE", required = true)
             @RequestParam("target") String target,
 
-            @RequestParam("access_token") String token
+            @RequestParam("access_token") String accessToken
     ) {
         target = target.toUpperCase();
-        Session session = this.sessionRepository.findByAccessToken(token);
-        if (session == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
-        User user = this.sessionRepository.findByAccessToken(token).getUser();
+        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
 
         if (!target.matches("(USER)|(QUEUE)"))
             return ErrorResponseFactory.getInvalidParamErrorResponse("invalid_target", "Unknown target value", response);
@@ -234,7 +215,7 @@ public class QueueApi {
 
     private Object deleteUser(String username, String queueName, User user, HttpServletResponse response) {
 
-        Queue q = this.queueRepository.findByName(queueName);
+        Queue q = this.repositoryManager.getQueue().byQueueName(queueName);
         if (q == null) return prepareQueueNotFoundErrorResponse(response);
 
         if (username.equals(user.getUsername())) {
@@ -244,30 +225,30 @@ public class QueueApi {
             if (!q.getMembers().contains(user)) return prepareUserNotFoundErrorResponse(response);
             q.getMembers().remove(user);
             q.getNotifications().add(prepareUserExitQueueNotification(user));
-            this.queueRepository.save(q);
+            this.repositoryManager.saveQueue(q);
             return null;
         }
 
         if (!q.getSuperUsers().contains(user)) return prepareForbiddenErrorResponse(response);
 
-        User delUser = this.userRepository.findByUsername(username);
+        User delUser = this.repositoryManager.getUser().byUsername(username);
         if (delUser == null || !q.getMembers().contains(delUser)) return prepareUserNotFoundErrorResponse(response);
 
         q.getMembers().remove(delUser);
         q.getNotifications().add(prepareUserWasDeletedFromQueueNotification(user, delUser));
-        this.queueRepository.save(q);
+        this.repositoryManager.saveQueue(q);
         return null;
     }
 
     @Transactional
     protected Object deleteQueue(String queueName, User user, HttpServletResponse response){
-        Queue q = this.queueRepository.findByName(queueName);
+        Queue q = this.repositoryManager.getQueue().byQueueName(queueName);
 
         if (q == null) return prepareQueueNotFoundErrorResponse(response);
         if (!q.getSuperUsers().contains(user)) return prepareForbiddenErrorResponse(response);
         List<Queue> list = new ArrayList<>();
         list.add(q);
-        this.queueRepository.deleteInBatch(list);
+        this.repositoryManager.deleteQueue(list);
 
         return null;
     }
