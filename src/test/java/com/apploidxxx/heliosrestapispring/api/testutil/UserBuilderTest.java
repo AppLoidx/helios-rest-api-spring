@@ -16,7 +16,7 @@ public class UserBuilderTest {
         User actualUser = UserBuilder.createUser().withName("1").withPassword("2").withFirstName("3").withLastName("4").withEmail("5").build();
 
         assertEquals(expectedUser.getUsername(), actualUser.getUsername());
-        assertEquals(expectedUser.getPassword(), actualUser.getPassword());
+        // password will be hashed
         assertEquals(expectedUser.getFirstName(), actualUser.getFirstName());
         assertEquals(expectedUser.getLastName(), actualUser.getLastName());
         assertEquals(expectedUser.getContactDetails().getEmail(), expectedUser.getContactDetails().getEmail());
