@@ -5,6 +5,8 @@ import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.queue.SwapContainer;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,6 +20,7 @@ import java.util.*;
  * @author Arthur Kupriyanov
  */
 @Data
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserInfo implements Serializable {
     private User user;
 

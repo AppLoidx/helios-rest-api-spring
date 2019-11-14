@@ -2,6 +2,8 @@ package com.apploidxxx.heliosrestapispring.api.model;
 
 import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +17,7 @@ import java.util.Set;
  */
 @Data
 @NoArgsConstructor
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class GroupModel {
     private Set<Map<String, String>> users = new LinkedHashSet<>();
     private Set<Map<String, String>> superUsers = new LinkedHashSet<>();

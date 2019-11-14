@@ -2,6 +2,8 @@ package com.apploidxxx.heliosrestapispring.api.model;
 
 
 import com.apploidxxx.heliosrestapispring.entity.note.Note;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.NoArgsConstructor;
 
 
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
  * @author Arthur Kupriyanov
  */
 @NoArgsConstructor
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class NoteModel {
 
     public Long noteId;
