@@ -2,9 +2,8 @@ package com.apploidxxx.heliosrestapispring.entity.group;
 
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -15,7 +14,7 @@ import java.util.Set;
  * @author Arthur Kupriyanov
  */
 @Entity
-@Getter@Setter
+@Data
 @NoArgsConstructor
 public class UsersGroup {
 
@@ -36,6 +35,9 @@ public class UsersGroup {
     }
 
     @Id
+    @GeneratedValue
+    private Long id;
+
     @Column
     private String name;
 
@@ -51,7 +53,7 @@ public class UsersGroup {
     private String description;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
             name="users_group",
             joinColumns = {@JoinColumn(name="group_name")},
@@ -60,17 +62,13 @@ public class UsersGroup {
     private Set<User> users;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
             name="super_users_group",
             joinColumns = {@JoinColumn(name="group_name")},
             inverseJoinColumns={@JoinColumn(name="super_users")}
     )
     private Set<User> groupSuperUsers;
-
-
-
-
 
     public void addSuperUser(User user){
         groupSuperUsers.add(user);

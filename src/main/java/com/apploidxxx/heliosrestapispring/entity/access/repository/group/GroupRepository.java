@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * @author Arthur Kupriyanov
  */
-public interface GroupRepository extends JpaRepository<UsersGroup, String> {
+public interface GroupRepository extends JpaRepository<UsersGroup, Long> {
     UsersGroup findByName(String name);
     void deleteByName(String name);
 }
