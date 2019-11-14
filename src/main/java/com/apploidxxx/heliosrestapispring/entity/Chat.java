@@ -38,7 +38,7 @@ public class Chat {
     @JsonIgnore
     private Queue queue;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany( cascade = CascadeType.ALL)
     private Set<Message> messages;
 
     /**

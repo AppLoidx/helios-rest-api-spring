@@ -38,10 +38,10 @@ public class UserData implements Serializable {
     @OneToOne
     private User user;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "target")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "target")
     private Set<Note> notes;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "author")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "author")
     private Set<Note> writtenNotes;
 
     /**

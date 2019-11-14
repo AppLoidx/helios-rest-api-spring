@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 /**
  *
@@ -35,13 +38,13 @@ public class Note {
     /**
      * Автор заметки
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private UserData author;
 
     /**
      * Адресат заметки
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private UserData target;
 
     /**

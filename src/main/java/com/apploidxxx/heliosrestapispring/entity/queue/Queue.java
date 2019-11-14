@@ -7,6 +7,8 @@ import com.apploidxxx.heliosrestapispring.entity.queue.session.statistic.UserPas
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Queue implements Serializable {
 
     public Queue(String name, String fullname){
@@ -67,13 +70,13 @@ public class Queue implements Serializable {
     private String fullname;
 
     @OrderColumn
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name="QUEUE_MEMBERS",
             joinColumns = {@JoinColumn(name="queue_name")},
             inverseJoinColumns={@JoinColumn(name="users_id")})
     private List<User> members;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name="QUEUE_SUPER_USERS",
             joinColumns = {@JoinColumn(name="queue_name")},
             inverseJoinColumns={@JoinColumn(name="super_users")})
@@ -86,10 +89,10 @@ public class Queue implements Serializable {
     @Column
     private String description;
 
-    @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Notification> notifications;
 
-    @OneToOne(fetch =  FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SwapContainer swapContainer;
 
     @OneToOne

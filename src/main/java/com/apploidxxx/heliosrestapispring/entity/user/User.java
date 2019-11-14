@@ -57,7 +57,7 @@ public class User {
     Long id;
 
 
-    @ManyToMany(mappedBy = "superUsers", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "superUsers")
     @JsonIgnore
     private Set<Queue> queueSuper;
 
@@ -65,7 +65,7 @@ public class User {
     @JsonIgnore
     private UserData userdata = new UserData(this);
 
-    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "members", cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<Queue> queueMember;
 
@@ -102,11 +102,11 @@ public class User {
     private Set<Timeline> timelines;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "users")
     private Set<UsersGroup> usersGroups;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "groupSuperUsers", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "groupSuperUsers")
     private Set<UsersGroup> usersGroupSuper;
 
     @OneToMany
