@@ -52,8 +52,7 @@ public class GroupsApi {
         UsersGroup group = this.groupRepository.findByName(groupName);
 
         if (group != null) return new GroupModel(group);
-
-        return ErrorResponseFactory.getInvalidParamErrorResponse("invalid group_name param", response);
+        else return ErrorResponseFactory.getInvalidParamErrorResponse("group not found", response);
     }
 
     @ApiOperation("Create new group")
@@ -68,7 +67,7 @@ public class GroupsApi {
             @RequestParam(value = "password", required = false) String password
     ){
         if (isGroupExist(groupName))
-            return ErrorResponseFactory.getInvalidParamErrorResponse("queue with this name already exist", response);
+            return ErrorResponseFactory.getInvalidParamErrorResponse("group with this name already exist", response);
 
         Session creatorSession = this.sessionRepository.findByAccessToken(accessToken);
         if (creatorSession == null){
