@@ -2,6 +2,7 @@ package com.apploidxxx.heliosrestapispring.api.testutil;
 
 import org.junit.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -29,6 +30,20 @@ public class MockUtilTest {
         }
 
         assertTrue(mockBeanAnnotationFound);
+    }
 
+    @Test
+    public void is_mockUtil_is_component(){
+
+        boolean annotated = false;
+
+        for (Annotation a : mockUtil.getClass().getDeclaredAnnotations()){
+            if (a.annotationType().getName().equals(Component.class.getName())){
+                annotated = true;
+                break;
+            }
+        }
+
+        assertTrue(annotated);
     }
 }
