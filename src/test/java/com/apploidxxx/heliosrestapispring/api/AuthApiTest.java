@@ -1,8 +1,6 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.HeliosRestApiSpringApplication;
-import com.apploidxxx.heliosrestapispring.api.model.Tokens;
-import com.apploidxxx.heliosrestapispring.api.testutil.PathResolver;
 import com.apploidxxx.heliosrestapispring.api.testutil.UserBuilder;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
@@ -11,21 +9,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * @author Arthur Kupriyanov
@@ -33,71 +26,72 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = HeliosRestApiSpringApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthApiTest {
-    @Autowired
+    @MockBean
     private UserRepository userRepository;
 
-    private RestTemplate restTemplate;
+    @Autowired
+    private AuthApi authApiController;
+
+    private MockMvc mockMvc;
 
     @Before
-    public void init(){
-        restTemplate = new RestTemplate();
+    public void init() {
+        this.mockMvc = standaloneSetup(this.authApiController).build();
     }
 
-    @LocalServerPort
-    private int port;
-
     @Test
-    public void check_user_auth() throws URISyntaxException, IOException {
+    public void check_user_auth() throws Exception {
 
+        // password hashed and we can't un-hash it
+        // and we generate our known password
         String password = UserBuilder.generatePassword();
         User user = UserBuilder.createUser().withPassword(password).build();
 
         this.userRepository.save(user);
 
-        Map<String , String> uriVariables = new HashMap<>();
-        uriVariables.put("login", user.getUsername());
-        uriVariables.put("password", password);
-        Tokens tokens;
+        when(this.userRepository.findByUsername(user.getUsername())).thenReturn(user);
 
-        assertNotNull(tokens = restTemplate.getForEntity(PathResolver.getEndpointPath("auth", port) + "?login={login}&password={password}", Tokens.class, uriVariables).getBody());
-
-        assertNotNull(tokens.getToken());
-        assertNotNull(tokens.getRefreshToken());
-
-        URI uri = new URI(PathResolver.getEndpointPath("auth", port) + "?access_token=" + tokens.getToken());
-
-        ClientHttpResponse response =
-                restTemplate
-                        .getRequestFactory()
-                        .createRequest
-                                (uri, HttpMethod.OPTIONS).execute();
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-
-        this.userRepository.delete(user);
+        mockMvc.perform(get("/api/auth")
+                .param("login", user.getUsername())
+                .param("password", password))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.access_token", is(user.getSession().getAccessToken())));
 
     }
 
     @Test
-    public void fail_auth(){
-        String password = UserBuilder.generatePassword();
-        User user = UserBuilder.createUser().withPassword(password).build();
+    public void fail_auth() throws Exception {
 
-        this.userRepository.save(user);
+        User user = getUser();
 
-        Map<String , String> uriVariables = new HashMap<>();
-        uriVariables.put("login", user.getUsername());
-        uriVariables.put("password", "incorrect password");
-        Tokens tokens = null;
-        try {
-            tokens = restTemplate.getForEntity(PathResolver.getEndpointPath("auth", port) + "?login={login}&password={password}", Tokens.class, uriVariables).getBody();
-        } catch (HttpStatusCodeException e){
-            assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
-        }
+        mockMvc.perform(get("/api/auth")
+                .param("login", user.getUsername())
+                .param("password", "another password"))
+                .andExpect(status().isUnauthorized());
+    }
 
-        assertNull(tokens);
+    @Test
+    public void bad_request() throws Exception {
 
-        this.userRepository.delete(user);
+        User user = getUser();
+
+        // don't pass password param
+        mockMvc.perform(get("/api/auth")
+                .param("login", user.getUsername()))
+                .andExpect(status().isBadRequest());
+
+        // don't pass login param
+        mockMvc.perform(get("/api/auth")
+                .param("password", user.getPassword()))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    private User getUser() {
+        User user = UserBuilder.createUser().build();
+        when(this.userRepository.findByUsername(user.getUsername())).thenReturn(user);
+
+        return user;
     }
 
 }
