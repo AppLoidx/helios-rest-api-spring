@@ -1,15 +1,14 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.HeliosRestApiSpringApplication;
+import com.apploidxxx.heliosrestapispring.api.testutil.MockUtil;
 import com.apploidxxx.heliosrestapispring.api.testutil.UserBuilder;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,11 +25,12 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = HeliosRestApiSpringApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthApiTest {
-    @MockBean
-    private UserRepository userRepository;
 
     @Autowired
     private AuthApi authApiController;
+
+    @Autowired
+    private MockUtil mockUtil;
 
     private MockMvc mockMvc;
 
@@ -47,9 +47,8 @@ public class AuthApiTest {
         String password = UserBuilder.generatePassword();
         User user = UserBuilder.createUser().withPassword(password).build();
 
-        this.userRepository.save(user);
 
-        when(this.userRepository.findByUsername(user.getUsername())).thenReturn(user);
+        when(mockUtil.getUserRepositoryMockBean().findByUsername(user.getUsername())).thenReturn(user);
 
         mockMvc.perform(get("/api/auth")
                 .param("login", user.getUsername())
@@ -62,7 +61,7 @@ public class AuthApiTest {
     @Test
     public void fail_auth() throws Exception {
 
-        User user = getUser();
+        User user = mockUtil.getRandomUserWithMockedRepository();
 
         mockMvc.perform(get("/api/auth")
                 .param("login", user.getUsername())
@@ -73,7 +72,7 @@ public class AuthApiTest {
     @Test
     public void bad_request() throws Exception {
 
-        User user = getUser();
+        User user = mockUtil.getRandomUserWithMockedRepository();
 
         // don't pass password param
         mockMvc.perform(get("/api/auth")
@@ -85,13 +84,13 @@ public class AuthApiTest {
                 .param("password", user.getPassword()))
                 .andExpect(status().isBadRequest());
     }
-
-
-    private User getUser() {
-        User user = UserBuilder.createUser().build();
-        when(this.userRepository.findByUsername(user.getUsername())).thenReturn(user);
-
-        return user;
-    }
+//
+//
+//    private User getUser() {
+//        User user = UserBuilder.createUser().build();
+//        when(this.userRepository.findByUsername(user.getUsername())).thenReturn(user);
+//
+//        return user;
+//    }
 
 }
