@@ -44,6 +44,11 @@ public class MockUtil {
         return user;
     }
 
+    /**
+     * Get a mocked Repository if you want mock custom entity
+     *
+     * @return {@link UserRepository} with {@link MockBean}
+     */
     public UserRepository getUserRepositoryMockBean(){
         return userRepository;
     }
