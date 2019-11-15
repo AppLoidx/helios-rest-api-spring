@@ -2,6 +2,8 @@ package com.apploidxxx.heliosrestapispring.entity.queue.session.statistic;
 
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +15,7 @@ import java.util.Date;
  */
 @Entity
 @Data@NoArgsConstructor
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserPassData {
 
     public UserPassData(User user, Date startTime, Date endTime, Statistic statistic){
