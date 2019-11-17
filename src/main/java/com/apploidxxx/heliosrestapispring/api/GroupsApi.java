@@ -36,7 +36,7 @@ public class GroupsApi {
         this.userRepository = userRepository;
     }
 
-    @ApiOperation("Get queue model")
+    @ApiOperation(value = "Get queue model", response = GroupModel.class)
     @GetMapping
     public Object getGroup(
             HttpServletResponse response,

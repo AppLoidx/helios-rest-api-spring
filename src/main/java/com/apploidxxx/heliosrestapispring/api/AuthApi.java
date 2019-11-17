@@ -44,7 +44,8 @@ public class AuthApi {
             @ApiResponse(
                     code = 200,
                     message =   "User authorized successfully. " +
-                                "Client will redirect to redirect_uri or gets Tokens if redirect_uri is declared"
+                                "Client will redirect to redirect_uri or gets Tokens if redirect_uri is declared",
+                    response = Tokens.class
             ),
 
             @ApiResponse(
