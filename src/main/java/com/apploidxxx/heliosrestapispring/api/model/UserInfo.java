@@ -30,7 +30,6 @@ public class UserInfo implements Serializable {
     private List<Map<String, String>> swapRequestsIn;
     private List<Map<String, String>> swapRequestsOut;
 
-    private List<Map<String, String>> groups;
     private List<Map<String, String>> groupsMember;
 
     public UserInfo(User user){
@@ -42,7 +41,6 @@ public class UserInfo implements Serializable {
     }
 
     private void initGroups(User user){
-        this.groups = new ArrayList<>();
         this.groupsMember = new ArrayList<>();
 
         for (UsersGroup usersGroup : user.getUsersGroupSuper()){
