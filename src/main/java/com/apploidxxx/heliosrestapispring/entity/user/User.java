@@ -43,6 +43,7 @@ public class User {
         this.contactDetails = new ContactDetails();
         this.badges = new LinkedHashSet<>();
         this.timelines = new LinkedHashSet<>();
+
     }
 
     public User(String username, String password, String firstName, String lastName, String email){
@@ -106,14 +107,29 @@ public class User {
 
     @JsonIgnore
     @ManyToMany(mappedBy = "users")
-    private Set<UsersGroup> usersGroups;
+    private Set<UsersGroup> usersGroups = new LinkedHashSet<>();
 
     @JsonIgnore
     @ManyToMany(mappedBy = "groupSuperUsers")
-    private Set<UsersGroup> usersGroupSuper;
+    private Set<UsersGroup> usersGroupSuper = new HashSet<>();
 
     @OneToMany
     private Set<UserPassData> userPassDataSet = new LinkedHashSet<>();
+
+    public Set<UsersGroup> getUsersGroups(){
+        if (usersGroups == null) usersGroups = new LinkedHashSet<>();
+        return usersGroups;
+    }
+
+    public Set<UsersGroup> getUsersGroupSuper(){
+        if (usersGroupSuper == null) usersGroupSuper = new HashSet<>();
+        return usersGroupSuper;
+    }
+
+    public Set<UserPassData> getUserPassDataSet(){
+        if (userPassDataSet == null) userPassDataSet = new LinkedHashSet<>();
+        return userPassDataSet;
+    }
 
     /**
      *
