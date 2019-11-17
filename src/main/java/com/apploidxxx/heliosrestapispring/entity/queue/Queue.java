@@ -54,7 +54,7 @@ public class Queue implements Serializable {
     private Date creationDate;
 
     @Column
-    private boolean started;
+    private Boolean started = false;
 
     @Column
     private GenerationType generationType;
@@ -191,5 +191,11 @@ public class Queue implements Serializable {
         }
 
         return longList;
+    }
+
+    public boolean isStarted(){
+        if (started == null) started = false;
+
+        return started;
     }
 }
