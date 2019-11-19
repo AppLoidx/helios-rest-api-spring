@@ -83,8 +83,8 @@ public class UsersGroup {
         users.add(user);
     }
 
-    public void deleteUser(){
-
+    public void deleteUser(User user){
+        users.remove(user);
     }
 
 
