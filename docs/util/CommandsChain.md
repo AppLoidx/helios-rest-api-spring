@@ -83,13 +83,7 @@ private interface Action {
 @RequestMapping("/api/groups.control/{groupName}")
 public class GroupsControlApi {
 
-    private final GroupRepository groupRepository;
-    private final RepositoryManager repositoryManager;
-
-    public GroupsControlApi(GroupRepository groupRepository, RepositoryManager repositoryManager) {
-        this.groupRepository = groupRepository;
-        this.repositoryManager = repositoryManager;
-    }
+    // some fields ...
 
     private Chain<Action> chain;
     // создаем цепочку наших команд
@@ -102,23 +96,16 @@ public class GroupsControlApi {
 
     @PutMapping
     public Object putSetting(
-            HttpServletResponse response,
-
-            @PathVariable("groupName") String groupName,
-
-            @RequestParam("access_token") String accessToken,
+            
+            // some params ...
 
             @RequestParam("property") String property,
             @RequestParam("value") String value
     ){
 
-        UsersGroup group = this.groupRepository.findByName(groupName);
-        User user = repositoryManager.getUser().byAccessToken(accessToken);
-        if (group == null) return ErrorResponseFactory.getInvalidParamErrorResponse("group not found", response);
+        // some methods ...
 
-        property = property.toLowerCase();
-
-        return chain.getAction(property, response).execute(value, group, user, response);
+        return chain.getAction(property).execute(value, group, user, response);
         // получаем нужную команды и вызываем у него метод исполнения с нужными параметрами.
     }
     
@@ -174,5 +161,21 @@ public class GroupsControlApi {
    
 }
 ``` 
+
+Плюсы:
+* Использование больше возможностей ООП стиля
+* Более читабельный код из-за того что методы используемые в логике
+другого процесса разделены от методов команд (actions)
+* Общая реализация всех дейсвтий с actions
+
+Минусы:
+* Ограничение сигнатуры. Сигнатура команд строго ограничена, что с одной
+стороны дает более безопасный код, но с другой ограничивает нас в сигнатруе,
+либо заставляет использовать избыточное количесвто параметров
+* Использование рефлексии. Во внутренней реализации использовано рефлексия,
+что трудно дебажить при возникновении каких-то ошибок
+* Необходимость использования дополнительных усилий кроме настройки самих команд.
+Необходимо инициализировать instance Chain (например, в `@PostConstruct`, если
+это конртоллер)
 
 
