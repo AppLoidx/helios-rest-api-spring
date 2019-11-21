@@ -25,26 +25,38 @@ public class CommandChainTest {
     public void addActions(){
         String property = "value";
 
+        // using lambda
         chain.addAction("m3", (val) -> "Some" + val);
         String actual = chain.getAction("m3").exec(property);
 
         assertEquals("Some" + property, actual);
 
+        // add all inner @Command classes of CommandThree
         chain.addAction(new CommandThree(), Executable.class);
         assertEquals(property + "m4", chain.getAction("m4").exec(property));
     }
+
 
     @Test
     public void actionNotFoundException() {
         try {
             chain.getAction("@g23g23fasdf").exec("some property");
         } catch (Exception e){
+            // if chain don't have property with this name he throws ActionNotFoundException
             assertTrue(e instanceof ActionNotFoundException);
         }
     }
     @Test
     public void incorrectCommandsUse() {
+        // class which have incorrect inner @Command classes
+        // and duplicated @Command classes
         chain.addAction(new BadCommandOuterClass(), Executable.class);
+
+        // NOTE: addAction operation in this case must log the WARN message
+        // because BadCommandOuterClass  have duplicated @Command classes
+
+        // Try to getAction for duplicated command
+        // this operation must not throw exception
         chain.getAction("incorrect_command_duplicate").exec("some value");
     }
 }
