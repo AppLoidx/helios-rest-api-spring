@@ -3,6 +3,9 @@ package com.apploidxxx.heliosrestapispring.api;
 import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
 import com.apploidxxx.heliosrestapispring.api.util.RepositoryManager;
 import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
+import com.apploidxxx.heliosrestapispring.api.util.chain.Chain;
+import com.apploidxxx.heliosrestapispring.api.util.chain.Command;
+import com.apploidxxx.heliosrestapispring.api.util.chain.CommandChain;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.group.GroupRepository;
 import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
@@ -12,14 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Arthur Kupriyanov
@@ -37,7 +32,7 @@ public class GroupsControlApi {
         this.repositoryManager = repositoryManager;
     }
 
-    private Chain chain;    // TODO: rewrite it to independent bean?
+    private Chain<Action> chain;    // TODO: rewrite it to independent bean?
 
     @PutMapping
     public Object putSetting(
@@ -57,7 +52,7 @@ public class GroupsControlApi {
 
         property = property.toLowerCase();
 
-        return chain.getAction(property, response).execute(value, group, user, response);
+        return chain.getAction(property).execute(value, group, user, response);
 
     }
 
@@ -132,65 +127,7 @@ public class GroupsControlApi {
 
     @PostConstruct
     private void init(){
-        Map<String, Action> actionsMap = new HashMap<>();
-        for( Class<?> declaredClass: this.getClass().getDeclaredClasses()){
-
-            Command annotation;
-
-            if ((annotation = declaredClass.getAnnotation(Command.class)) == null) continue;
-
-            boolean implementedAction = false;
-            for (Class i : declaredClass.getInterfaces()){
-                if (i == Action.class){
-                    implementedAction = true;
-                    break;
-                }
-            }
-            if (!implementedAction){
-                log.error("Class " + declaredClass.getName() + " not implemented " + Action.class.getName());
-                continue;
-            }
-
-            try {
-                for (Constructor c: declaredClass.getDeclaredConstructors()){
-                    if (c.getParameterTypes().length == 1){
-                        c.setAccessible(true);
-                        actionsMap.put(annotation.value(), (Action) c.newInstance(this));
-                        break;
-                    }
-                }
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                log.error("Can't initialize class", e);
-            }
-        }
-
-        chain = new Chain(actionsMap);
+        chain = new CommandChain().init(this, Action.class);
     }
-
-    private static class Chain{
-        Chain(Map<String, Action> actionsMap){
-            this.actionsMap = actionsMap;
-        }
-        Map<String, Action> actionsMap;
-
-        Action getAction(String property, HttpServletResponse response){
-            Action action = actionsMap.get(property);
-            if (action == null){
-                return (v, u, g, r) -> ErrorResponseFactory.getInvalidParamErrorResponse("Property param not found", response);
-            }
-            return action;
-        }
-    }
-
-
-
-    @Target({ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    private @interface Command {
-        String value();
-    }
-
-
-
 
 }
