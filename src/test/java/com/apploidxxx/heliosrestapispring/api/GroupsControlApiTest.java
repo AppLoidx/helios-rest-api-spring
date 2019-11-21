@@ -44,7 +44,7 @@ public class GroupsControlApiTest {
     }
 
     @Test
-    public void change_fullame() throws Exception {
+    public void change_fullname() throws Exception {
         User user = mockUtil.getRandomUserWithMockedRepository();
         String fullname = "old Fullname Of Queue";
         UsersGroup usersGroup = new UsersGroup(user, "zxcs", fullname, "");
@@ -64,6 +64,4 @@ public class GroupsControlApiTest {
                 .andExpect(status().isOk());
 
     }
-
-
 }
