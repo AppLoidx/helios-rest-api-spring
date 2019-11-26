@@ -1,9 +1,7 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 import com.apploidxxx.heliosrestapispring.HeliosRestApiSpringApplication;
-import com.apploidxxx.heliosrestapispring.api.testutil.UserBuilder;
-import com.apploidxxx.heliosrestapispring.entity.Session;
-import com.apploidxxx.heliosrestapispring.entity.access.repository.SessionRepository;
+import com.apploidxxx.heliosrestapispring.api.testutil.MockUtil;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.group.GroupRepository;
 import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
@@ -41,8 +39,8 @@ public class GroupsApiTest {
     @MockBean
     private GroupRepository groupRepository;
 
-    @MockBean
-    private SessionRepository sessionRepository;
+    @Autowired
+    private MockUtil mockUtil;
 
     @Before
     public void setup() {
@@ -147,11 +145,7 @@ public class GroupsApiTest {
     }
 
     private User getUser() {
-        User user = UserBuilder.createUser().build();
-        new Session().generateSession(user);
-        when(this.sessionRepository.findByAccessToken(user.getSession().getAccessToken())).thenReturn(user.getSession());
-
-        return user;
+        return mockUtil.getRandomUserWithMockedRepository();
     }
 
 }
