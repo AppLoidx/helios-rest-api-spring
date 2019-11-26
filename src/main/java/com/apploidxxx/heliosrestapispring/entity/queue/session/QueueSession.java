@@ -29,6 +29,6 @@ public class QueueSession {
     @ManyToOne
     private Queue queue;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Statistic statistic = new Statistic(this);
 }
