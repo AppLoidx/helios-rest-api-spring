@@ -84,13 +84,5 @@ public class AuthApiTest {
                 .param("password", user.getPassword()))
                 .andExpect(status().isBadRequest());
     }
-//
-//
-//    private User getUser() {
-//        User user = UserBuilder.createUser().build();
-//        when(this.userRepository.findByUsername(user.getUsername())).thenReturn(user);
-//
-//        return user;
-//    }
 
 }
