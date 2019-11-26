@@ -14,6 +14,7 @@ import java.util.Map;
  */
 @Slf4j
 public class CommandChain {
+
     /**
      * Return a chains of command {@link Chain} which have
      * {@link Chain#getAction(String)}.

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
-//TODO rewrite with template responses factory
 
 /**
  * @author Arthur Kupriyanov
@@ -85,6 +84,9 @@ public class QueueControlApi {
 
 
         action = action.toLowerCase();
+
+        // TODO: rewrite with CommandChain
+
         switch (action) {
             case "shuffle":
                 return shuffle(queue, user);

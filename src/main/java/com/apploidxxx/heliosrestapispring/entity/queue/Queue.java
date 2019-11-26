@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +20,6 @@ import java.util.*;
 /**
  * @author Arthur Kupriyanov
  */
-@EqualsAndHashCode(doNotUseGetters = true)
 @Entity
 @Getter
 @Setter
@@ -95,8 +93,8 @@ public class Queue implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SwapContainer swapContainer;
 
-    @OneToOne
-    private QueueSession queueSession = new QueueSession();
+    @OneToOne(mappedBy = "queue", cascade = CascadeType.PERSIST)
+    private QueueSession queueSession = new QueueSession(this);
 
     @OneToMany(mappedBy = "queue")
     private Set<UserPassData> userPassDataSet = new HashSet<>();
@@ -197,5 +195,18 @@ public class Queue implements Serializable {
         if (started == null) started = false;
 
         return started;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Queue queue = (Queue) o;
+        return Objects.equals(name, queue.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }
