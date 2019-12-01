@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
  * <strong>Declared MockBeans:</strong>
  *      <ul>
  *          <li>{@link UserRepository}</li>
+ *          <li>{@link SessionRepository}</li>
  *      </ul>
  * <hr>
  *
@@ -50,10 +51,20 @@ public class MockUtil {
      */
     public User getRandomUserWithMockedRepository(){
         User user = UserBuilder.createUser().build();
+        mockUserAndSession(user);
+        return user;
+    }
+
+    public User getRandomUserWithMockedRepository(String username){
+        User user = UserBuilder.createUser().withName(username).build();
+        mockUserAndSession(user);
+        return user;
+    }
+
+    private void mockUserAndSession(User user){
         new Session().generateSession(user);
         when(this.userRepository.findByUsername(user.getUsername())).thenReturn(user);
         when(this.sessionRepository.findByAccessToken(user.getSession().getAccessToken())).thenReturn(user.getSession());
-        return user;
     }
 
     /**
@@ -64,4 +75,5 @@ public class MockUtil {
     public UserRepository getUserRepositoryMockBean(){
         return userRepository;
     }
+    public SessionRepository getSessionRepositoryMockBean() { return sessionRepository; }
 }
