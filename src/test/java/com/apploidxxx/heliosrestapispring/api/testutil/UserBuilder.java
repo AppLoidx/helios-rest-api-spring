@@ -2,6 +2,7 @@ package com.apploidxxx.heliosrestapispring.api.testutil;
 
 import com.apploidxxx.heliosrestapispring.api.util.Password;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
+import com.apploidxxx.heliosrestapispring.entity.user.UserType;
 
 import java.util.Base64;
 import java.util.Date;
@@ -52,6 +53,12 @@ public abstract class UserBuilder {
             user.getContactDetails().setEmail(email);
             return this;
         }
+
+        public UserBuilderNode withUsertype(UserType usertype){
+            user.setUserType(usertype);
+            return this;
+        }
+
         public User build(){
             return user;
         }
