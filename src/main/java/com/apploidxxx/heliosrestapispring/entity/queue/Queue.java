@@ -158,6 +158,7 @@ public class Queue implements Serializable {
     }
 
     public List<User> getMembersList() {
+        if (members == null) members = new LinkedList<>();
         return members;
     }
 
