@@ -30,13 +30,15 @@ public class GroupsControlApiTest {
     @Autowired
     MockUtil mockUtil;
 
-    private MockMvc mockMvc;
+
 
     @MockBean
     private GroupRepository groupRepository;
 
     @Autowired
     private GroupsControlApi groupsControlApiController;
+
+    private MockMvc mockMvc;
 
     @Before
     public void init() {
