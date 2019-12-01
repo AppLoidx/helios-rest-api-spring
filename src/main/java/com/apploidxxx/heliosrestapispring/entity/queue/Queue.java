@@ -93,6 +93,9 @@ public class Queue implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SwapContainer swapContainer;
 
+    @ManyToMany
+    private Set<User> cursoredUsers = new HashSet<>();
+
     @OneToOne(mappedBy = "queue", cascade = CascadeType.PERSIST)
     private QueueSession queueSession = new QueueSession(this);
 
@@ -189,6 +192,13 @@ public class Queue implements Serializable {
         }
 
         return longList;
+    }
+
+    public Set<User> getCursoredUsers(){
+        if (cursoredUsers == null) {
+            cursoredUsers = new HashSet<>();
+        }
+        return cursoredUsers;
     }
 
     public boolean isStarted(){

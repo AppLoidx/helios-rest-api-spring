@@ -113,8 +113,8 @@ public class User {
     @ManyToMany(mappedBy = "groupSuperUsers")
     private Set<UsersGroup> usersGroupSuper = new HashSet<>();
 
-    @OneToMany
-    private Set<UserPassData> userPassDataSet = new LinkedHashSet<>();
+    @ManyToMany(mappedBy = "cursoredUsers")
+    private Set<Queue> cursoredInQueues;
 
     public Set<UsersGroup> getUsersGroups(){
         if (usersGroups == null) usersGroups = new LinkedHashSet<>();
