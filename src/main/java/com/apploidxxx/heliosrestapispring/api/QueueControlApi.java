@@ -36,9 +36,7 @@ public class QueueControlApi {
     public Object nextUser(
             HttpServletResponse response,
             @PathVariable("queueId") String queueId,
-            @RequestParam("access_token") String accessToken,
-
-            @RequestParam(value = "passed_user", required = false) String username
+            @RequestParam("access_token") String accessToken
     ){
 
         User user = this.repositoryManager.getUser().byAccessToken(accessToken);
@@ -50,7 +48,7 @@ public class QueueControlApi {
         if (!queue.getMembers().get(0).equals(user) && !isCanManageQueue(user, queue))
             return ErrorResponseFactory.getForbiddenErrorResponse( "you are not in cursor to move", response);
 
-        Queue newQueue = QueueManager.nextUser(queue, user);
+        Queue newQueue = QueueManager.moveUserToEnd(queue, user);
         this.repositoryManager.saveQueue(newQueue);
         return newQueue;
     }
