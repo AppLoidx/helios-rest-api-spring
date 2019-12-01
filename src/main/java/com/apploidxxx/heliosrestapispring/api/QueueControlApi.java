@@ -36,7 +36,9 @@ public class QueueControlApi {
     public Object nextUser(
             HttpServletResponse response,
             @PathVariable("queueId") String queueId,
-            @RequestParam("access_token") String accessToken
+            @RequestParam("access_token") String accessToken,
+
+            @RequestParam(value = "passed_user", required = false) String username
     ){
 
         User user = this.repositoryManager.getUser().byAccessToken(accessToken);
