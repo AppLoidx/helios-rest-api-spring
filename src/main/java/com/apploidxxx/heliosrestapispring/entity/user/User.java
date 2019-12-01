@@ -105,6 +105,9 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Timeline> timelines;
 
+    @OneToMany
+    private Set<UserPassData> userPassDataSet = new LinkedHashSet<>();
+
     @JsonIgnore
     @ManyToMany(mappedBy = "users")
     private Set<UsersGroup> usersGroups = new LinkedHashSet<>();
