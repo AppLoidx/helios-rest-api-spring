@@ -4,6 +4,7 @@ package com.apploidxxx.heliosrestapispring.entity.user;
 import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.Session;
 import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
+import com.apploidxxx.heliosrestapispring.entity.queue.CursoredUsersWrapper;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.queue.session.statistic.UserPassData;
 import com.apploidxxx.heliosrestapispring.entity.user.timeline.Timeline;
@@ -116,8 +117,13 @@ public class User {
     @ManyToMany(mappedBy = "groupSuperUsers")
     private Set<UsersGroup> usersGroupSuper = new HashSet<>();
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "cursoredUsers")
     private Set<Queue> cursoredInQueues;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "cursoredUsers")
+    private Set<CursoredUsersWrapper> inCursoredUsersWrapper;
 
     public Set<UsersGroup> getUsersGroups(){
         if (usersGroups == null) usersGroups = new LinkedHashSet<>();
