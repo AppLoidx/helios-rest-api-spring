@@ -2,7 +2,6 @@ package com.apploidxxx.heliosrestapispring.queue;
 
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
-import com.apploidxxx.heliosrestapispring.queue.controller.NextUserStrategy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedList;
@@ -18,6 +17,8 @@ public class QueueManager {
      * <br><br>
      *
      * <span style="color: orange">Note</span> : this method don't modify the cursoredUsers field in {@link Queue}
+     * <br>
+     * <span style="color: orange">Note</span> : this method can add new user if you don't check that your provided user exist in queue
      *
      * @param queue queue which contains this user
      * @param user user which needed to move
@@ -25,8 +26,9 @@ public class QueueManager {
      */
     public static Queue moveUserToEnd(Queue queue, User user)
     {
-        LinkedList<User> linkedList = (LinkedList<User>) queue.getMembers();
+        LinkedList<User> linkedList = new LinkedList<>(queue.getMembers());
         if (linkedList.isEmpty()) return queue;
+
 
         linkedList.remove(user);
         linkedList.addLast(user);
@@ -34,23 +36,5 @@ public class QueueManager {
 
         return queue;
     }
-    public static Queue nextUser(Queue queue, User user){
-        if (queue.getQueueSequence().isEmpty()) return queue;
 
-        switch (queue.getQueueType()){
-            case SINGLE: return singleQueueNext(queue, user);
-            case MULTIPLE: return multipleQueueNext(queue, user);
-            default:
-                log.warn("Queue type " + queue.getQueueType() + " undefined");
-                return queue;
-        }
-    }
-
-    private static Queue singleQueueNext(Queue queue, User user){
-        return NextUserStrategy.getDefaultStrategy().nextUser(user, queue);
-    }
-
-    private static Queue multipleQueueNext(Queue queue, User user){
-        return NextUserStrategy.getMultiThreadedStrategy().nextUser(user, queue);
-    }
 }
