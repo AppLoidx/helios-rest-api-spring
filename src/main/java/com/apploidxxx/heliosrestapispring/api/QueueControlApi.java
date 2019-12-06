@@ -48,7 +48,7 @@ public class QueueControlApi {
         if (!queue.getMembers().get(0).equals(user) && !isCanManageQueue(user, queue))
             return ErrorResponseFactory.getForbiddenErrorResponse( "you are not in cursor to move", response);
 
-        Queue newQueue = QueueManager.moveUserToEnd(queue, user);
+        Queue newQueue = QueueManager.moveUserToEnd(queue, queue.getMembers().get(0));
         this.repositoryManager.saveQueue(newQueue);
         return newQueue;
     }
