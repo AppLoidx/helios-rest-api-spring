@@ -142,6 +142,7 @@ public class Queue implements Serializable {
 
     public void shuffle(){
         Collections.shuffle(members);
+        cursoredUsers.clear();
     }
 
     public void swap(User user1, User user2 ) throws IndexOutOfBoundsException{
@@ -207,6 +208,13 @@ public class Queue implements Serializable {
         if (started == null) started = false;
 
         return started;
+    }
+
+    @Transient
+    public Set<User> getSetOfCursoredUsers(){
+        Set<User> cursoredUsers = new HashSet<>();
+        this.getCursoredUsers().forEach((key , elem) -> cursoredUsers.addAll(elem.getCursoredUsers()));
+        return cursoredUsers;
     }
 
     @Override

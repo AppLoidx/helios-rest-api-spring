@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -69,7 +68,7 @@ public class TeacherQueueApi {
         }
         else {
 
-            final Set<User> cursoredUsers = getSetOfCursoredUsers(queue);
+            final Set<User> cursoredUsers = queue.getSetOfCursoredUsers();
 
             for (User member : queue.getMembersList()) {
                 if (cursoredUsers.contains(member)) continue;
@@ -94,7 +93,7 @@ public class TeacherQueueApi {
 
         // TODO: refactor
         if (queue.getMembers().size() > 1){
-            final Set<User> cursoredUsers = getSetOfCursoredUsers(queue);
+            final Set<User> cursoredUsers = queue.getSetOfCursoredUsers();
             for (User member : queue.getMembersList()){
                 if (!cursoredUsers.contains(member)){
                     currentAndNextUserModel.setNextUser(new CurrentAndNextUser.User(member));
@@ -183,11 +182,5 @@ public class TeacherQueueApi {
 
     private User getUserByAccessToken(String accessToken){
         return this.repositoryManager.getUser().byAccessToken(accessToken);
-    }
-
-    private Set<User> getSetOfCursoredUsers(Queue queue){
-        Set<User> cursoredUsers = new HashSet<>();
-        queue.getCursoredUsers().forEach((key , elem) -> cursoredUsers.addAll(elem.getCursoredUsers()));
-        return cursoredUsers;
     }
 }
