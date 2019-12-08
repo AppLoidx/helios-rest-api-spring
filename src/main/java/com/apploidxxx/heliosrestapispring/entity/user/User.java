@@ -3,6 +3,7 @@ package com.apploidxxx.heliosrestapispring.entity.user;
 
 import com.apploidxxx.heliosrestapispring.entity.ContactDetails;
 import com.apploidxxx.heliosrestapispring.entity.Session;
+import com.apploidxxx.heliosrestapispring.entity.commentary.Commentary;
 import com.apploidxxx.heliosrestapispring.entity.group.UsersGroup;
 import com.apploidxxx.heliosrestapispring.entity.queue.CursoredUsersWrapper;
 import com.apploidxxx.heliosrestapispring.entity.queue.Queue;
@@ -16,10 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -66,9 +64,6 @@ public class User {
     @JsonIgnore
     private Set<Queue> queueSuper;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private UserData userdata = new UserData(this);
 
     @ManyToMany(mappedBy = "members", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -124,6 +119,14 @@ public class User {
     @JsonIgnore
     @ManyToMany(mappedBy = "cursoredUsers")
     private Set<CursoredUsersWrapper> inCursoredUsersWrapper;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL)
+    private List<Commentary> commentaries = new LinkedList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    private List<Commentary> commentariesAuthor = new LinkedList<>();
 
     public Set<UsersGroup> getUsersGroups(){
         if (usersGroups == null) usersGroups = new LinkedHashSet<>();
@@ -183,8 +186,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "userdata=" + userdata +
-                ", contactDetails=" + contactDetails +
+                " contactDetails=" + contactDetails +
                 ", username='" + username + '\'' +
                 ", groupName='" + groupName + '\'' +
                 ", password='" + password + '\'' +
