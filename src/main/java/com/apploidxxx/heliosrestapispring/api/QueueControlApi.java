@@ -10,9 +10,11 @@ import com.apploidxxx.heliosrestapispring.queue.QueueManager;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 
 /**
@@ -21,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 @Api("Controls of queue")
 @RestController
 @RequestMapping("/api/queue/{queueId}")
+@Slf4j
 public class QueueControlApi {
 
 
@@ -33,22 +36,33 @@ public class QueueControlApi {
 
     @ApiOperation("Init a user passed event")
     @GetMapping
-    public Object nextUser(
+    public Object userPassed(
             HttpServletResponse response,
             @PathVariable("queueId") String queueId,
             @RequestParam("access_token") String accessToken
     ){
 
-        User user = this.repositoryManager.getUser().byAccessToken(accessToken);
+        User requestedUser = this.repositoryManager.getUser().byAccessToken(accessToken);
 
         Queue queue = this.repositoryManager.getQueue().byQueueName(queueId);
 
         if (queue.getMembers().isEmpty()) return ErrorResponseFactory.getInvalidParamErrorResponse("queue is empty", response);
 
-        if (!queue.getMembers().get(0).equals(user) && !isCanManageQueue(user, queue))
+        if (!queue.getMembers().get(0).equals(requestedUser) && !isCanManageQueue(requestedUser, queue))
             return ErrorResponseFactory.getForbiddenErrorResponse( "you are not in cursor to move", response);
 
-        Queue newQueue = QueueManager.moveUserToEnd(queue, queue.getMembers().get(0));
+        User target = queue.getMembers().get(0);
+        Queue newQueue = QueueManager.moveUserToEnd(queue, target);
+
+        queue.getCursoredUsers().forEach((key, elem) -> {
+            if (elem.getCursoredUsers().contains(target)){
+                Set<User> oldSet = queue.getCursoredUsers().get(key).getCursoredUsers();
+                oldSet.remove(target);
+                log.info("removing user : " + target.getUsername());
+                queue.getCursoredUsers().get(key).setCursoredUsers(oldSet);
+            }
+        });
+
         this.repositoryManager.saveQueue(newQueue);
         return newQueue;
     }
