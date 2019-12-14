@@ -3,6 +3,7 @@
 <h2 align=center>
   <img src="https://heroku-badge.herokuapp.com/?app=helios-service&style=flat&svg=1" />
   <img src="https://github.com/AppLoidx/helios-rest-api-spring/workflows/Java%20CI/badge.svg" />
+  <img src="https://img.shields.io/lgtm/alerts/g/AppLoidx/helios-rest-api-spring.svg?logo=lgtm&logoWidth=18" />
   <br/><br/>
   📗<a href="https://helios-service.herokuapp.com/swagger-ui.html"> API Documentation</a>
 </h2>
