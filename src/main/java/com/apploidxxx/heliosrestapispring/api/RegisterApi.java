@@ -74,11 +74,10 @@ public class RegisterApi {
             return e.getResponse(response);
         }
 
-        if (!RedirectUriChecker.checkIsSafe(redirectUri)){
-            throw getRedirectUriIsNotSafeException();
-        }
+        if (RedirectUriChecker.checkIsSafe(redirectUri)){
+            return saveNewUser(username, password, firstName, lastName, email, group, response, redirectUri, state);
+        } else throw getRedirectUriIsNotSafeException();
 
-        return saveNewUser(username, password, firstName, lastName, email, group, response, redirectUri, state);
     }
 
     @ApiOperation("Delete user from system")
