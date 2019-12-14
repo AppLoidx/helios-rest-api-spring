@@ -74,12 +74,12 @@ public class AuthApiTest {
 
         User user = mockUtil.getRandomUserWithMockedRepository();
 
-        // don't pass password param
+        // without password param
         mockMvc.perform(get("/api/auth")
                 .param("login", user.getUsername()))
                 .andExpect(status().isBadRequest());
 
-        // don't pass login param
+        // without login param
         mockMvc.perform(get("/api/auth")
                 .param("password", user.getPassword()))
                 .andExpect(status().isBadRequest());
