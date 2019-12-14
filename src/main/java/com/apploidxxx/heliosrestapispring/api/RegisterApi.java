@@ -1,11 +1,10 @@
 package com.apploidxxx.heliosrestapispring.api;
 
 
+import com.apploidxxx.heliosrestapispring.api.exception.ResponsibleException;
 import com.apploidxxx.heliosrestapispring.api.exception.VulnerabilityException;
-import com.apploidxxx.heliosrestapispring.api.util.ErrorResponseFactory;
-import com.apploidxxx.heliosrestapispring.api.util.GroupChecker;
-import com.apploidxxx.heliosrestapispring.api.util.Password;
-import com.apploidxxx.heliosrestapispring.api.util.VulnerabilityChecker;
+import com.apploidxxx.heliosrestapispring.api.model.ErrorMessage;
+import com.apploidxxx.heliosrestapispring.api.util.*;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.ContactDetailsRepository;
 import com.apploidxxx.heliosrestapispring.entity.access.repository.UserRepository;
 import com.apploidxxx.heliosrestapispring.entity.user.User;
@@ -75,6 +74,10 @@ public class RegisterApi {
             return e.getResponse(response);
         }
 
+        if (!RedirectUriChecker.checkIsSafe(redirectUri)){
+            throw getRedirectUriIsNotSafeException();
+        }
+
         return saveNewUser(username, password, firstName, lastName, email, group, response, redirectUri, state);
     }
 
@@ -120,5 +123,13 @@ public class RegisterApi {
 
     private boolean emailExist(String email){
         return this.contactDetailsRepository.findByEmail(email) != null;
+    }
+
+    private ResponsibleException getRedirectUriIsNotSafeException(){
+        return new VulnerabilityException(
+                "Your redirect Uri os not safe",
+                new ErrorMessage("redirect_uri_is_not_safe",
+                        "Your provided redirect uri is not safe")
+        );
     }
 }
