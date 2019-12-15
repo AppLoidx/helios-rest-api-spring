@@ -74,9 +74,7 @@ public class RegisterApi {
             return e.getResponse(response);
         }
 
-        if (RedirectUriChecker.checkIsSafe(redirectUri)){
-            return saveNewUser(username, password, firstName, lastName, email, group, response, redirectUri, state);
-        } else throw getRedirectUriIsNotSafeException();
+        return saveNewUser(username, password, firstName, lastName, email, group, response, redirectUri, state);
 
     }
 
@@ -107,7 +105,10 @@ public class RegisterApi {
 
         if (!usernameExist && !emailExist){
             this.userRepository.save(new User(username, Password.hash(password), firstName, lastName, email, group));
-            response.sendRedirect(redirectUri + "?state=" + state);
+            if (RedirectUriChecker.checkIsSafe(redirectUri)){
+                response.sendRedirect(redirectUri + "?state=" + state);
+            } else throw getRedirectUriIsNotSafeException();
+
             return null;
         }
         else {
