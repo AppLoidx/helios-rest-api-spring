@@ -18,7 +18,7 @@
 
 [🏃 Getting Started](docs/GettingStarted.md)
 
-[ 🛠  Getting Started for outside Developers](docs\GettingStartedForOutsideDevelopers.md)
+[ 🛠  Getting Started for outside Developers](docs/GettingStartedForOutsideDevelopers.md)
 
 
 
