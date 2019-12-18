@@ -43,9 +43,6 @@ public class RepositoryManager {
         this.userRepository.save(user);
     }
     public void saveQueue(Queue queue) { this.queueRepository.save(queue); }
-    public void deleteUser(User user){
-        this.userRepository.delete(user);
-    }
 
     public QueueFind getQueue() throws PersistenceException {
         return new QueueFind();

@@ -116,7 +116,4 @@ public class UserInfo implements Serializable {
         return user;
     }
 
-    public List<Map<String, String>> getQueues() {
-        return queues;
-    }
 }

@@ -30,8 +30,6 @@ public class QueueTest {
         u2.setId(2L);
         q.addUser(u1);
         q.addUser(u2);
-        System.out.println(q.getMembers());
         q.swap(u1, u2);
-        System.out.println(q.getMembers());
     }
 }

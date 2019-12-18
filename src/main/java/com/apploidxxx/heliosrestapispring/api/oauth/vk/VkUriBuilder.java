@@ -9,9 +9,7 @@ import java.io.IOException;
  */
 public class VkUriBuilder {
 
-        private static String VK_AUTHORIZE_URI = "https://oauth.vk.com/authorize";
-        private static String VK_ACCESS_URI = "https://oauth.vk.com/access_token";
-        private static String VK_API_METHOD_URI = "https://api.vk.com/method/";
+    private static String VK_API_METHOD_URI = "https://api.vk.com/method/";
         private static String VK_USER_INFO_METHOD_URI = VK_API_METHOD_URI + "users.get";
         private final static String clientId ;
         private final static String clientSecret ;
@@ -35,24 +33,24 @@ public class VkUriBuilder {
         }
 
 
-        /*
+    /*
+        notify - 1
+        Добавление ссылки на приложение в меню слева - 256
+        offline - 65536
+        email - 4194304
+     */
+        private static String scope = String.valueOf(1 + 256 + 65536 + 4194304);
+
+    private static String version = "5.101";
+
+        public static String getCodeTokenPath(String state) {
+            String VK_AUTHORIZE_URI = "https://oauth.vk.com/authorize";
+            /*
             page — форма авторизации в отдельном окне;
             popup — всплывающее окно;
          */
-        private static String display = "page";
-
-        /*
-            notify - 1
-            Добавление ссылки на приложение в меню слева - 256
-            offline - 65536
-            email - 4194304
-         */
-        private static String scope = String.valueOf(1 + 256 + 65536 + 4194304);
-
-        private static String responseType = "code";
-        private static String version = "5.101";
-
-        public static String getCodeTokenPath(String state) {
+            String display = "page";
+            String responseType = "code";
             return String.format("%s?client_id=%s" +
                             "&redirect_uri=%s" +
                             "&display=%s" +
@@ -64,6 +62,7 @@ public class VkUriBuilder {
         }
 
         public static String getAccessTokenPath(String code) {
+            String VK_ACCESS_URI = "https://oauth.vk.com/access_token";
             return String.format("%s?client_id=%s" +
                             "&client_secret=%s" +
                             "&redirect_uri=%s" +

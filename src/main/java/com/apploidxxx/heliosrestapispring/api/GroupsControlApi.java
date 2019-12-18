@@ -56,12 +56,12 @@ public class GroupsControlApi {
 
     }
 
-    private boolean checkAccess(User target, User employer, UsersGroup usersGroup){
-        return target.equals(employer) || isSuperForGroup(employer, usersGroup);
+    private boolean checkIsNotAccessed(User target, User employer, UsersGroup usersGroup){
+        return !target.equals(employer) && isNotSuperUser(employer, usersGroup);
     }
 
-    private boolean isSuperForGroup(User employer, UsersGroup usersGroup){
-        return employer.getUserType() == UserType.TEACHER || employer.getUserType() == UserType.ADMIN || usersGroup.getGroupSuperUsers().contains(employer);
+    private boolean isNotSuperUser(User employer, UsersGroup usersGroup){
+        return employer.getUserType() != UserType.TEACHER && employer.getUserType() != UserType.ADMIN && !usersGroup.getGroupSuperUsers().contains(employer);
     }
 
     @Command("add_user")
@@ -70,7 +70,7 @@ public class GroupsControlApi {
         @Override
         public Object execute(String value, UsersGroup usersGroup, User user, HttpServletResponse response) {
             User target = repositoryManager.getUser().byUsername(value);
-            if (!checkAccess(target, user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
+            if (checkIsNotAccessed(target, user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
 
             if (usersGroup.getUsers().contains(target)) return ErrorResponseFactory.getInvalidParamErrorResponse("user already exist", response);
             usersGroup.addUser(target);
@@ -85,7 +85,7 @@ public class GroupsControlApi {
         @Override
         public Object execute(String value, UsersGroup usersGroup, User user, HttpServletResponse response) {
             User target = repositoryManager.getUser().byUsername(value);
-            if (!checkAccess(target, user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
+            if (checkIsNotAccessed(target, user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
 
             if (!usersGroup.getUsers().contains(target)) return ErrorResponseFactory.getInvalidParamErrorResponse("user doesn't exist in group", response);
             usersGroup.deleteUser(target);
@@ -99,7 +99,7 @@ public class GroupsControlApi {
 
         @Override
         public Object execute(String value, UsersGroup usersGroup, User user, HttpServletResponse response) {
-            if (!isSuperForGroup(user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
+            if (isNotSuperUser(user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
             usersGroup.setPassword(value);  // TODO: add validation
             groupRepository.save(usersGroup);
             return null;
@@ -111,7 +111,7 @@ public class GroupsControlApi {
 
         @Override
         public Object execute(String value, UsersGroup usersGroup, User user, HttpServletResponse response) {
-            if (!isSuperForGroup(user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
+            if (isNotSuperUser(user, usersGroup)) return ErrorResponseFactory.getForbiddenErrorResponse(response);
             VulnerabilityChecker.checkWord(value);
             usersGroup.setFullname(value);  // TODO: add validation
             groupRepository.save(usersGroup);

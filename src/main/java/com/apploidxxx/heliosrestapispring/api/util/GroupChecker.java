@@ -14,7 +14,8 @@ public class GroupChecker {
      */
     public static boolean isValid(String group){
         // TODO: write group validation
-        return true;
+
+        return !"".equals(group);
     }
 
 }

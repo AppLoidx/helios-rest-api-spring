@@ -42,7 +42,7 @@ public class CommandChain {
             log.debug("Founded action annotated with Command annotation: " + declaredClass.getName());
 
             boolean implementedAction = false;
-            for (Class i : declaredClass.getInterfaces()) {
+            for (Class<?> i : declaredClass.getInterfaces()) {
                 if (i == implementationFunctionalInterface) {
                     implementedAction = true;
                     break;

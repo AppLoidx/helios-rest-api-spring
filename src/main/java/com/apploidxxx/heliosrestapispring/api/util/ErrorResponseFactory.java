@@ -76,27 +76,4 @@ public abstract class ErrorResponseFactory {
         return new ErrorMessage(title, description);
     }
 
-
-    // *
-
-    // NOT FOUND STATUS - 404
-
-    // *
-
-    public static ErrorMessage getNotFoundErrorResponse(String title, String description, HttpServletResponse response){
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        return new ErrorMessage(title, description);
-    }
-
-
-    // *
-
-    // NOT FOUND STATUS - 404
-
-    // *
-
-    public static ErrorMessage getInternalServerError(String description, HttpServletResponse response){
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        return new ErrorMessage("internal_server_error", description);
-    }
 }

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,19 +18,10 @@ import java.util.stream.Collectors;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class CurrentAndNextUser {
 
-    public CurrentAndNextUser(com.apploidxxx.heliosrestapispring.entity.user.User currentUsers){
-        this.currentUsers = new LinkedHashSet<>();
-        this.currentUsers.add(new User(currentUsers));
-    }
 
     public CurrentAndNextUser(Set<com.apploidxxx.heliosrestapispring.entity.user.User> currentUsers){
         if (currentUsers != null)
         this.currentUsers = currentUsers.stream().map(User::new).collect(Collectors.toSet());
-    }
-
-    public CurrentAndNextUser(com.apploidxxx.heliosrestapispring.entity.user.User currentUsers, com.apploidxxx.heliosrestapispring.entity.user.User nextUser) {
-        this(currentUsers);
-        this.nextUser = new User(nextUser);
     }
 
     private Set<User> currentUsers;

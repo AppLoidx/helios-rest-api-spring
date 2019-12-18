@@ -61,7 +61,7 @@ public class ChatApi {
     ){
 
         User user = this.sessionRepository.findByAccessToken(token).getUser();
-        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);;
+        if (user == null) return ErrorResponseFactory.getInvalidTokenErrorResponse(response);
 
         Queue queue = this.queueRepository.findByName(queueName);
         if (queue  == null) return generateQueueNotFoundErrorResponse(response);
