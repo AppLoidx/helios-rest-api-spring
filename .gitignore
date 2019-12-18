@@ -33,4 +33,3 @@ build/
 ### GOOGLE client secret ###
 src/main/resources/client_secret_*
 src/main/resources/local_env.properties
-src/main/resources/static

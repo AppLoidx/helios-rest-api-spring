@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Article">
+<head>
+    <meta charset="UTF-8">
+    <title>Login via Helios API</title>
+    <script>
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+
+            let redirectUri = "m/login.html";
+
+            let urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has("redirect_uri")) {
+                redirectUri = redirectUri + "?redirect_uri=" + urlParams.get("redirect_uri");
+            }
+            if (urlParams.has("state")) {
+                redirectUri = redirectUri + "&state=" + urlParams.get("state");
+            }
+            window.location.href = redirectUri;
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.2.0/anime.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start" defer></script>
+
+    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="assets/css/google-button.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <meta name="msapplication-TileColor" content="#603cba">
+    <meta name="theme-color" content="#ffffff">
+
+<!--    Google Sign-in-->
+    <meta name="google-signin-client_id" content="835400034288-9ml5qeqd6ciis356v1s995345f5cbirn.apps.googleusercontent.com">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+
+    <script>
+        var auth2;
+        function start() {
+            gapi.load('auth2', function() {
+                auth2 = gapi.auth2.init({
+                    client_id: '835400034288-9ml5qeqd6ciis356v1s995345f5cbirn.apps.googleusercontent.com',
+                    // Scopes to request in addition to 'profile' and 'email'
+                    //scope: 'additional_scope'
+                });
+            });
+        }
+
+        function vkButtonClicked() {
+            document.location.href = "/api/vk/oauth/redirect?redirect_uri=" + document.querySelector("#redirect_uri").getAttribute("value").valueOf();
+        }
+    </script>
+</head>
+<body>
+
+<div class="page">
+    <div class="container">
+        <div class="left">
+            <div class="eula">
+                <button type="button" class="google-button" id="google-signinButton" style="width: 200px; margin: 5px">
+                  <span class="google-button__icon">
+                    <svg viewBox="0 0 366 372" xmlns="http://www.w3.org/2000/svg"><path d="M125.9 10.2c40.2-13.9 85.3-13.6 125.3 1.1 22.2 8.2 42.5 21 59.9 37.1-5.8 6.3-12.1 12.2-18.1 18.3l-34.2 34.2c-11.3-10.8-25.1-19-40.1-23.6-17.6-5.3-36.6-6.1-54.6-2.2-21 4.5-40.5 15.5-55.6 30.9-12.2 12.3-21.4 27.5-27 43.9-20.3-15.8-40.6-31.5-61-47.3 21.5-43 60.1-76.9 105.4-92.4z" id="Shape" fill="#EA4335"/><path d="M20.6 102.4c20.3 15.8 40.6 31.5 61 47.3-8 23.3-8 49.2 0 72.4-20.3 15.8-40.6 31.6-60.9 47.3C1.9 232.7-3.8 189.6 4.4 149.2c3.3-16.2 8.7-32 16.2-46.8z" id="Shape" fill="#FBBC05"/><path d="M361.7 151.1c5.8 32.7 4.5 66.8-4.7 98.8-8.5 29.3-24.6 56.5-47.1 77.2l-59.1-45.9c19.5-13.1 33.3-34.3 37.2-57.5H186.6c.1-24.2.1-48.4.1-72.6h175z" id="Shape" fill="#4285F4"/><path d="M81.4 222.2c7.8 22.9 22.8 43.2 42.6 57.1 12.4 8.7 26.6 14.9 41.4 17.9 14.6 3 29.7 2.6 44.4.1 14.6-2.6 28.7-7.9 41-16.2l59.1 45.9c-21.3 19.7-48 33.1-76.2 39.6-31.2 7.1-64.2 7.3-95.2-1-24.6-6.5-47.7-18.2-67.6-34.1-20.9-16.6-38.3-38-50.4-62 20.3-15.7 40.6-31.5 60.9-47.3z" fill="#34A853"/></svg>
+                  </span>
+                    <span class="google-button__text">Sign in with Google</span>
+                </button>
+                <button type="button" class="google-button" onclick="vkButtonClicked()" id="vk-signinButton" style="width: 200px; margin-left: 0; margin: 5px">
+                  <span class="google-button__icon" style="margin-left: 0; margin-right: 18px">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 18px;" viewBox="32 32 960 960"><path d="M179.928 32h664.144C925.767 32 992 98.23 992 179.929v664.143C992 925.768 925.767 992 844.072 992H179.928C98.23 992 32 925.768 32 844.071V179.929C32 98.23 98.23 32 179.928 32" fill="#4c75a3"/><path d="M503.946 704.029h39.269s11.859-1.307 17.923-7.831c5.573-5.996 5.396-17.249 5.396-17.249s-.769-52.692 23.683-60.452c24.113-7.647 55.07 50.925 87.88 73.449 24.812 17.039 43.667 13.31 43.667 13.31l87.739-1.227s45.895-2.832 24.132-38.917c-1.782-2.947-12.679-26.693-65.238-75.48-55.02-51.062-47.644-42.801 18.626-131.128 40.358-53.79 56.49-86.628 51.449-100.691-4.803-13.399-34.489-9.86-34.489-9.86l-98.786.611s-7.328-.998-12.756 2.25c-5.31 3.177-8.717 10.599-8.717 10.599s-15.642 41.622-36.486 77.024c-43.988 74.693-61.58 78.647-68.771 74.002-16.729-10.811-12.549-43.422-12.549-66.596 0-72.389 10.98-102.57-21.381-110.384-10.737-2.591-18.646-4.305-46.11-4.585-35.25-.358-65.078.108-81.971 8.384-11.239 5.504-19.91 17.766-14.626 18.472 6.53.869 21.313 3.99 29.152 14.655 10.126 13.776 9.772 44.703 9.772 44.703s5.818 85.213-13.585 95.795c-13.314 7.26-31.582-7.561-70.8-75.327-20.091-34.712-35.265-73.085-35.265-73.085s-2.922-7.17-8.141-11.008c-6.33-4.65-15.175-6.124-15.175-6.124l-93.876.613s-14.09.394-19.267 6.521c-4.606 5.455-.368 16.725-.368 16.725s73.49 171.942 156.711 258.592c76.315 79.454 162.958 74.239 162.958 74.239" fill="#fff"/></svg>
+                  </span>
+                    <span class="google-button__text">Sign in with VK</span>
+                </button>
+                <button type="button" class="google-button" onclick="vkButtonClicked()" id="helios-signinButton" style="width: 200px; margin-left: 0; margin: 5px">
+                  <span class="google-button__icon">
+                    <img src="https://fixer.com.ua/pi/lilalu_100507053.jpg" height="18px" alt="">
+                  </span>
+                    <span class="google-button__text">Sign in with se.ifmo</span>
+                </button>
+                <br>
+                <p style="margin-left: 8px">
+                    Если у Вас нет аккаунта
+                    <a href="register.html" id="register-link" class="linkStyle"
+                    onclick="window.location.href='/auth/register.html?redirect_uri=' + document.querySelector('#redirect_uri').getAttribute('value').valueOf() + '&state=' + document.querySelector('#state').getAttribute('value').valueOf(); return false;">
+                        зарегистрируйтесь
+                    </a>
+
+                </p>
+            </div>
+        </div>
+        <div class="right">
+            <svg viewBox="0 0 320 300" class="svg-form">
+                <defs>
+                    <linearGradient
+                            id="linearGradient"
+                            x1="13"
+                            y1="193.49992"
+                            x2="307"
+                            y2="193.49992"
+                            gradientUnits="userSpaceOnUse">
+                        <stop
+                                style="stop-color:#ff00ff;"
+                                offset="0"
+                                id="stop876"></stop>
+                        <stop
+                                style="stop-color:#ff0000;"
+                                offset="1"
+                                id="stop878"></stop>
+                    </linearGradient>
+                </defs>
+                <path class="path-form" d="m 40,120.00016 240.99984,-3.1e-4
+                c 0,0 24.99263,0.79932 25.00016,35.00016 0.008,34.20084 -25.00016,35 -25.00016,35
+                h -239.99984
+                c 0,-0.0205 -25,4.01348 -25,38.5 0,34.48652 25,38.5 25,38.5
+                h 215 c 0,0 20,-0.99604 20,-25 0,-24.00396 -20,-25 -20,-25
+                h -190
+                c 0,0 -20,1.71033 -20,25 0,24.00396 20,25 20,25
+                h 168.57143"></path>
+            </svg>
+            <form class="form" action="/api/auth">
+                <div style="color: red; position: fixed; top: 65px" id="invalid-auth" hidden>Неверный логин или пароль</div>
+                <label for="username">Username</label>
+                <input  class="type-input" name="login" autocomplete="username" type="text" id="username">
+                <label for="password" id="password-label">Password</label>
+                <input class="type-input" type="password" autocomplete="current-password" id="password" name="password">
+                <input type="submit"
+                       id="submit" value="Submit" >
+                <input type="text" id="redirect_uri" name="redirect_uri" readonly hidden value="/blank.html">
+                <input type="text" id="state" name="state" readonly hidden value="">
+
+            </form>
+
+
+        </div>
+    </div>
+</div>
+<script>
+    let urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("redirect_uri")) {
+        document.querySelector("#redirect_uri").setAttribute("value", urlParams.get("redirect_uri"));
+    }
+    if (urlParams.has("state")) {
+        document.querySelector("#state").setAttribute("value", urlParams.get("state"));
+    } else {
+        document.querySelector("#state").setAttribute("disabled", "disabled");
+    }
+</script>
+
+<script>
+    document.getElementById("#register-link").addEventListener('click', (event) => {
+        event.preventDefault();
+        document.location.href = `/auth/register.html?redirect_uri=${document.querySelector("#redirect_uri").getAttribute("value").valueOf()}&state=${document.querySelector("#state").getAttribute("value").valueOf()}`
+    })
+</script>
+
+<!--Google Script-->
+
+<script>
+    function vkAuth(){
+        document.location.href = ""
+    }
+
+</script>
+
+<script>
+    var current = null;
+    document.querySelector('#username').addEventListener('mouseenter', function (e) {
+        if (current) current.pause();
+        current = anime({
+            targets: 'path',
+            strokeDashoffset: {
+                value: 0,
+                duration: 700,
+                easing: 'easeOutQuart'
+            },
+            strokeDasharray: {
+                value: '240 1386',
+                duration: 700,
+                easing: 'easeOutQuart'
+            }
+        });
+    });
+    document.querySelector('#password').addEventListener('mouseenter', function (e) {
+        if (current) current.pause();
+        current = anime({
+            targets: 'path',
+            strokeDashoffset: {
+                value: -336,
+                duration: 700,
+                easing: 'easeOutQuart'
+            },
+            strokeDasharray: {
+                value: '240 1386',
+                duration: 700,
+                easing: 'easeOutQuart'
+            }
+        });
+    });
+    document.querySelector('#submit').addEventListener('mouseenter', function (e) {
+        if (current) current.pause();
+        current = anime({
+            targets: 'path',
+            strokeDashoffset: {
+                value: -730,
+                duration: 700,
+                easing: 'easeOutQuart'
+            },
+            strokeDasharray: {
+                value: '530 1386',
+                duration: 700,
+                easing: 'easeOutQuart'
+            }
+        });
+    });
+</script>
+
+<script>
+    function signInCallback(authResult) {
+        if (authResult['code']) {
+
+            // Hide the sign-in button now that the user is authorized, for example:
+            $('.google-button__text').innerText = "Signed In With Google";
+
+            // Send the code to the server
+            $.ajax({
+                type: 'POST',
+                url: '/api/google/oauth' + `?code=${authResult['code']}`,
+                // Always include an `X-Requested-With` header in every AJAX request,
+                // to protect against CSRF attacks.
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                contentType: 'application/octet-stream; charset=utf-8',
+                success: function(result) {
+                    // Handle or verify the server response.
+                    let redirect_uri = document.querySelector("#redirect_uri").getAttribute("value").valueOf();
+
+                    document.location.href = redirect_uri + "?authorization_code=" + result["authorization_code"];
+                },
+                processData: false,
+                statusCode : {
+                    401: function (result) {
+                        document.location.href = "register.html#" + result.email;
+                    },
+                    500: function () {
+                        // TODO: write correct user notice
+                        alert('INTERNAL SERVER ERROR');
+                    }
+                }
+            });
+        } else {
+            alert('Error');
+        }
+    }
+
+    $('#google-signinButton').click(function() {
+        // signInCallback defined in step 6.
+        auth2.grantOfflineAccess().then(signInCallback);
+    });
+</script>
+</body>
+</html>
