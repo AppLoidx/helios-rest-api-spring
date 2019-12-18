@@ -1,6 +1,7 @@
-# Helios REST API [Spring Edition]
-
-<h2 align=center>
+<h1 align=center>Helios REST API [Spring Edition]</h1>
+<h2 align=center><br/>
+<img src="docs/img/README/logo.jpg" />
+    <br />
 <br/>
   <img src="https://heroku-badge.herokuapp.com/?app=helios-service&style=flat&svg=1" />
   <img src="https://github.com/AppLoidx/helios-rest-api-spring/workflows/Java%20CI/badge.svg" />
@@ -16,4 +17,13 @@
 📗<a href="https://helios-service.herokuapp.com/swagger-ui.html"> API Documentation</a>
 
 [🏃 Getting Started](docs/GettingStarted.md)
+
+
+
+## Author 🖤 
+
+|[Arthur Kupriyanov](https://github.com/AppLoidx)|
+| :------------------------:|
+|<img src="https://avatars1.githubusercontent.com/u/32590754?s=460&v=4" width=300 height=300 />|
+|email: [apploidyakutsk@gmail.com](mailto:apploidyakutsk@gmail.com)|
 
