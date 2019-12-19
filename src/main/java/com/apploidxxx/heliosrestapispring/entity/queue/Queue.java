@@ -103,6 +103,9 @@ public class Queue implements Serializable {
     @OneToMany(mappedBy = "queue")
     private Set<UserPassData> userPassDataSet = new HashSet<>();
 
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "favorites")
+    private List<User> favoriteUsers;
+
     public String getName() {
         return name;
     }

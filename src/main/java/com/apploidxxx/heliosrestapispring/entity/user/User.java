@@ -128,6 +128,10 @@ public class User {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Commentary> commentariesAuthor = new LinkedList<>();
 
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<Queue> favorites;
+
     public Set<UsersGroup> getUsersGroups(){
         if (usersGroups == null) usersGroups = new LinkedHashSet<>();
         return usersGroups;
