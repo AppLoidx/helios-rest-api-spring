@@ -26,7 +26,7 @@ public class QueueSession {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    @OneToOne
     private Queue queue;
 
     @OneToOne(cascade = CascadeType.ALL)
