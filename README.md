@@ -16,11 +16,11 @@
 
 📗<a href="https://helios-service.herokuapp.com/swagger-ui.html"> API Documentation</a>
 
-[🏃 Getting Started](docs/GettingStarted.md)
+🏃 [Getting Started](docs/GettingStarted.md)
 
-[ 🛠  Getting Started for outside Developers](docs/GettingStartedForOutsideDevelopers.md)
+🛠 [Getting Started for outside Developers](docs/GettingStartedForOutsideDevelopers.md)
 
-[Introduction for API Developers](docs/dev/Introduction.md)
+🧾 [Introduction for API Developers](docs/dev/Introduction.md)
 
 
 ## Author 🖤 
