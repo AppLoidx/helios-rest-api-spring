@@ -11,6 +11,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -32,12 +33,16 @@ public class UserInfo implements Serializable {
 
     private List<Map<String, String>> groupsMember;
 
+    private List<QueueShortInfo> favorites;
+
     public UserInfo(User user){
         this.user = user;
         this.swapRequestsIn = new ArrayList<>();
         this.swapRequestsOut = new ArrayList<>();
         initQueues(user);
         initGroups(user);
+
+        this.favorites = user.getFavorites().stream().map(QueueShortInfo::new).collect(Collectors.toList());
     }
 
     private void initGroups(User user){
