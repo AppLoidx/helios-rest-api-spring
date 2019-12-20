@@ -25,7 +25,7 @@
 
 Как было указано в [Getting Started](../GettingStarted.md) в проекте используется версия Spring Boot 2.1.8
 
-Конфигурирование ендпоинтов через JavaConfig или `application.properties`
+Конфигурирование ендпоинтов через JavaConfig:
 
 Пример:
 
