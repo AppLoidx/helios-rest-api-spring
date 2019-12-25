@@ -42,7 +42,7 @@ public class CommentariesApi {
 
 
         if (accessedToWatchCommentaries(requestedUser, target) || isTeacher(requestedUser)){
-            if (requestedUser.equals(target) && ownParam.equals("false") || ownParam.equals("true")){
+            if (isTeacher(requestedUser) && (requestedUser.equals(target) && ownParam.equals("false") || ownParam.equals("true"))){
                 return getWrittenComments(requestedUser);
             }
             if (!isTeacher(requestedUser)) return getOnlyPublicCommentaries(target.getCommentaries());
