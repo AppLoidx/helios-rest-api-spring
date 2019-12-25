@@ -34,12 +34,17 @@ public class CommentariesApi {
     public Object getCommentaries(
             HttpServletResponse response,
             @RequestParam("username") String username,
-            @RequestParam("access_token") String accessToken
+            @RequestParam("access_token") String accessToken,
+            @RequestParam(value = "own", defaultValue = "false") String ownParam
     ){
         User requestedUser = this.repositoryManager.getUser().byAccessToken(accessToken);
         User target = this.repositoryManager.getUser().byUsername(username);
 
+
         if (accessedToWatchCommentaries(requestedUser, target) || isTeacher(requestedUser)){
+            if (requestedUser.equals(target) && ownParam.equals("false") || ownParam.equals("true")){
+                return getWrittenComments(requestedUser);
+            }
             if (!isTeacher(requestedUser)) return getOnlyPublicCommentaries(target.getCommentaries());
 
             return target.getCommentaries();
@@ -105,6 +110,10 @@ public class CommentariesApi {
 
     private List<Commentary> getOnlyPublicCommentaries(List<Commentary> commentaryList){
         return commentaryList.stream().filter(commentary -> commentary.getCommentaryType() == CommentaryType.PUBLIC).collect(Collectors.toList());
+    }
+
+    private List<Commentary> getWrittenComments(User user){
+        return user.getCommentariesAuthor();
     }
 
 
