@@ -41,7 +41,7 @@ public class User {
         this.lastName = lastName;
         this.contactDetails = new ContactDetails();
         this.badges = new LinkedHashSet<>();
-        this.timelines = new LinkedHashSet<>();
+        this.timelines = new LinkedList<>();
 
     }
 
@@ -99,7 +99,7 @@ public class User {
     private Set<Badge> badges;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private Set<Timeline> timelines;
+    private List<Timeline> timelines;
 
     @OneToMany
     private Set<UserPassData> userPassDataSet = new LinkedHashSet<>();
