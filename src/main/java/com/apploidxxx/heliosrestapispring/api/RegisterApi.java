@@ -127,7 +127,7 @@ public class RegisterApi {
 
     private ResponsibleException getRedirectUriIsNotSafeException(){
         return new VulnerabilityException(
-                "Your redirect Uri os not safe",
+                "Your redirect Uri is not safe",
                 new ErrorMessage("redirect_uri_is_not_safe",
                         "Your provided redirect uri is not safe")
         );
