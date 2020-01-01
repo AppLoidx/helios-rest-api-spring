@@ -36,7 +36,7 @@ public class RepositoryManager {
     }
 
     public boolean isUserExist(String username){
-        return new UserFind().byUsername(username) != null;
+        return this.userRepository.findByUsername(username) != null;
     }
 
     public void saveUser(User user){
