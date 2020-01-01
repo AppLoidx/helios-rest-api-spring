@@ -106,7 +106,7 @@ public class RegisterApi {
         if (!usernameExist && !emailExist){
             this.userRepository.save(new User(username, Password.hash(password), firstName, lastName, email, group));
             if (RedirectUriChecker.checkIsSafe(redirectUri)){
-                response.sendRedirect("/auth/login.html?redirect_uri=" + redirectUri + "&state=" + state);
+                response.sendRedirect("/auth/login.html?redirect_uri=" + redirectUri + "&state=" + state);  //lgtm [java/unvalidated-url-redirection]
             } else throw getRedirectUriIsNotSafeException();
 
             return null;
