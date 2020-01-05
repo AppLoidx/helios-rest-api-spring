@@ -27,6 +27,6 @@
 
 |[Arthur Kupriyanov](https://github.com/AppLoidx)|
 | :------------------------:|
-|<img src="https://avatars1.githubusercontent.com/u/32590754?s=460&v=4" width=300 height=300 />|
+|<img src="https://i.imgur.com/KUQEmzP.png" width=300 height=300 />|
 |email: [apploidyakutsk@gmail.com](mailto:apploidyakutsk@gmail.com)|
 
