@@ -21,12 +21,3 @@
 🛠 [Getting Started for outside Developers](docs/GettingStartedForOutsideDevelopers.md)
 
 🧾 [Introduction for API Developers](docs/dev/Introduction.md)
-
-
-## Author 🖤 
-
-|[Arthur Kupriyanov](https://github.com/AppLoidx)|
-| :------------------------:|
-|<img src="https://i.imgur.com/KUQEmzP.png" width=300 height=300 />|
-|email: [apploidyakutsk@gmail.com](mailto:apploidyakutsk@gmail.com)|
-
